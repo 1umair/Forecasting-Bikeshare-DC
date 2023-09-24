@@ -7,7 +7,7 @@ Please edit the following template to record your responses and provide details 
 Team #: 10
 Team Members: 
 
-* Eric Loui, GT ID 832603. Over a decade of experience in cybersecurity as a cyber threat intelligence analyst and teamlead. Currently a Principal Intelligence Analyst at CrowdStrike. Dayjob involves basic python scripting to automate workflows and data analysis. Occasionally I have experimented with doing basic K-means or linear regression on cybersecurity datasets. I regularly write reports and have in the past made many presentations to communicate findings of research and analysis. Formal education: BA, Political Science, Swarthmore College (2009); MA, International Affairs, American University (2013); Professional Certificate, Data Science, Cal State Fullerton (2021).
+* Eric Loui, GT ID 903955593. Over a decade of experience in cybersecurity as a cyber threat intelligence analyst and teamlead. Currently a Principal Intelligence Analyst at CrowdStrike. Dayjob involves basic python scripting to automate workflows and data analysis. Occasionally I have experimented with doing basic K-means or linear regression on cybersecurity datasets. I regularly write reports and have in the past made many presentations to communicate findings of research and analysis. Formal education: BA, Political Science, Swarthmore College (2009); MA, International Affairs, American University (2013); Professional Certificate, Data Science, Cal State Fullerton (2021).
 
 [Insert background information: Name, professional background, education background, previous 	analytics related projects you have worked on]
 
@@ -20,12 +20,13 @@ Team Members:
 
 #### Project Title: 
 #### Background Information on chosen project topic: 
-Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from DC’s Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
+Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
 
 
 ### Problem Statement (clear and concise statement explaining purpose of your analysis and investigation): 
 
 ### State your Primary Research Question (RQ): 
+Using the predictor variables available in our dataset, can we predict bikeshare usage over time?
 
 #### Add some possible Supporting Research Questions (2-4 RQs that support problem statement): 
 * What are the main factors influencing bikesharing rates?
@@ -81,20 +82,19 @@ Data Description (describe each of your data sources, include screenshots of a f
 * The independent variables will likely be some combination of all the other variables.
 
 # APPROACH/METHODOLOGY (8 points)
-## Planned Approach (
-    In paragraph(s), describe the approach you will take and what are the models you will try to use? Mention any data transformations that would need to happen. How do you plan to compare your models? How do you plan to train and optimize your model hyper-parameters?))
+## Planned Approach 
+(In paragraph(s), describe the approach you will take and what are the models you will try to use? Mention any data transformations that would need to happen. How do you plan to compare your models? How do you plan to train and optimize your model hyper-parameters?)
 
 
 ## Anticipated Conclusions/Hypothesis 
 (what results do you expect, how will you approach lead you to determining the final conclusion of your analysis) Note: At the end of the project, you do not have to be correct or have acceptable accuracy, the purpose is to walk us through an analysis that gives the reader insight into the conclusion regarding your objective/problem statement
 
+We expect to find that there are strong seasonality patterns in the data, both in terms of day of the week, as well as the week/month of the year. We expect higher usage during weekends, and during tourist seasons in DC.
 
-
+We also expect weather will influence usage - that users are more likely to use the system when there is no precipitation, and when the weather is warm.
 
 ### What business decisions will be impacted by the results of your analysis? What could be some benefits?
-
-
-
+Our findings would influence planning for when to add more bikes to a system as well as when it is safer to take some bikes out of commission for maintenance or upgrades. Additionally, ridership projections can also help inform revenue projections, since some riders pay per-ride.
 
 # PROJECT TIMELINE/PLANNING (2 points)
 ## Project Timeline/Mention key dates you hope to achieve certain milestones by:

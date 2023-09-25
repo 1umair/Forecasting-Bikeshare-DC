@@ -13,7 +13,7 @@ Team Members:
 
 * Daniel Garrison, GT ID 903935213. I graduated December 2022 with a Bachelor of Science in Applied and Computational Mathematics from Kennesaw State University. After graduation, I began employment at Morgan Stanley, and I am in the process of transitioning to a portfolio manager position. I mainly use excel at work; however, I am well-versed in both python and R because of my academic background. I've taken courses in bayesian statistics and regression analysis, and I am proficient in discrete math and linear algebra. My senior year I did research on modeling the movement of C. Elegans (nematodes) using partial differential equations in python.
 * Joshua Blakely, GT ID 903745052. Over a decade of experience working as a mechanical engineer in the oil and gas industry. I have worked for AWS forecasting their EC2, EBS and S3 usage down to the component level. I currently work as a Quantitative Data Scientist for a hedging advisory firm. I have worked with Python and R through both work and education. I am a TA for Bayesian Statistics. Education: BS Mechanical Engineering.
-* Team Member 4 Name; GT Id or EdX username 
+* Umair Zakir Abowath, GT ID 903845079. I have a bachelors in electrical engineering and have been working as a Data Scientist for over four years. I have an experience in bayesian statistics, Machine learning and Artificial Intelligence in general.
 * Team Member 5 Name; GT Id or EdX username 
 
 # OBJECTIVE/PROBLEM (5 points)

@@ -104,7 +104,7 @@ Our findings would influence planning for when to add more bikes to a system as 
 # PROJECT TIMELINE/PLANNING (2 points)
 ## Project Timeline/Mention key dates you hope to achieve certain milestones by:
 
-*Progress report finished and submitted by November 2nd (due November 4th).
-*Final report finished and submitted by December 1st (due December 3rd).
+Progress report finished and submitted by November 2nd (due November 4th).
+Final report finished and submitted by December 1st (due December 3rd).
 
 ## Appendix (any preliminary figures or charts that you would like to include): 

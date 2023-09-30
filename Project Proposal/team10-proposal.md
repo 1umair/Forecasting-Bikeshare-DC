@@ -7,30 +7,35 @@ Please edit the following template to record your responses and provide details 
 Team #: 10
 Team Members: 
 
-* Eric Loui, GT ID 903955593. Over a decade of experience in cybersecurity as a cyber threat intelligence analyst and teamlead. Currently a Principal Intelligence Analyst at CrowdStrike. Dayjob involves basic python scripting to automate workflows and data analysis. Occasionally I have experimented with doing basic K-means or linear regression on cybersecurity datasets. I regularly write reports and have in the past made many presentations to communicate findings of research and analysis. Formal education: BA, Political Science, Swarthmore College (2009); MA, International Affairs, American University (2013); Professional Certificate, Data Science, Cal State Fullerton (2021).
-
 [Insert background information: Name, professional background, education background, previous 	analytics related projects you have worked on]
 
+* Eric Loui, GT ID 903955593. Over a decade of experience in cybersecurity as a cyber threat intelligence analyst and teamlead. Currently a Principal Intelligence Analyst at CrowdStrike. Dayjob involves basic python scripting to automate workflows and data analysis. Occasionally I have experimented with doing basic K-means or linear regression on cybersecurity datasets. I regularly write reports and have in the past made many presentations to communicate findings of research and analysis. Formal education: BA, Political Science, Swarthmore College (2009); MA, International Affairs, American University (2013); Professional Certificate, Data Science, Cal State Fullerton (2021).
+
 * Daniel Garrison, GT ID 903935213. I graduated December 2022 with a Bachelor of Science in Applied and Computational Mathematics from Kennesaw State University. After graduation, I began employment at Morgan Stanley, and I am in the process of transitioning to a portfolio manager position. I mainly use excel at work; however, I am well-versed in both python and R because of my academic background. I've taken courses in bayesian statistics and regression analysis, and I am proficient in discrete math and linear algebra. My senior year I did research on modeling the movement of C. Elegans (nematodes) using partial differential equations in python.
+
 * Joshua Blakely, GT ID 903745052. Over a decade of experience working as a mechanical engineer in the oil and gas industry. I have worked for AWS forecasting their EC2, EBS and S3 usage down to the component level. I currently work as a Quantitative Data Scientist for a hedging advisory firm. I have worked with Python and R through both work and education. I am a TA for Bayesian Statistics. Education: BS Mechanical Engineering.
+
 * Umair Zakir Abowath, GT ID 903845079. I have a bachelors in electrical engineering and have been working as a Data Scientist for over four years. I have an experience in bayesian statistics, Machine learning and Artificial Intelligence in general.
+
 * Adam Peir,  GT ID 903054541. I am currently a data analyst for the federal government, where I specialize in areas of mail theft, narcotics, and finacial fraud. I received my BS in mechanical engineering from the University of Texas. I am comfortable with python, R, and SQL. 
 
 # OBJECTIVE/PROBLEM (5 points)
 
 #### Project Title: 
+
 #### Background Information on chosen project topic: 
 Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
 
 
 ### Problem Statement (clear and concise statement explaining purpose of your analysis and investigation): 
 
+
 ### State your Primary Research Question (RQ): 
 Using the predictor variables available in our dataset, can we predict bikeshare usage over time?
 
 #### Add some possible Supporting Research Questions (2-4 RQs that support problem statement): 
 * What are the main factors influencing bikesharing rates?
-
+* How sensitive is bikesharing to the influencing factors?
 
 
 ### Business Justification: 
@@ -99,7 +104,7 @@ Our findings would influence planning for when to add more bikes to a system as 
 # PROJECT TIMELINE/PLANNING (2 points)
 ## Project Timeline/Mention key dates you hope to achieve certain milestones by:
 
-
-
+Progress report finished and submitted by November 2nd (due November 4th).
+Final report finished and submitted by December 1st (due December 3rd).
 
 ## Appendix (any preliminary figures or charts that you would like to include): 

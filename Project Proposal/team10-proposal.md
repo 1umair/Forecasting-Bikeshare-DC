@@ -92,7 +92,7 @@ Data Description (describe each of your data sources, include screenshots of a f
 ## Planned Approach 
 (In paragraph(s), describe the approach you will take and what are the models you will try to use? Mention any data transformations that would need to happen. How do you plan to compare your models? How do you plan to train and optimize your model hyper-parameters?)
 
-First, we use a multiple linear regression model to determine which predictors are statistically significant.
+First, we use multiple linear regression to create different models. This gives an idea of the statistical significance of each variable. Next, we conduct partial F-tests and analyze the correlation coefficients between variables to find the variables with greatest explanatory power. Finally, we perform an ANOVA analysis to discover if there are differences in bikesharing between the casual and registered populations.
 
 
 ## Anticipated Conclusions/Hypothesis 

@@ -28,6 +28,7 @@ Bikesharing systems are an increasingly popular solution in major urban areas to
 
 
 ### Problem Statement (clear and concise statement explaining purpose of your analysis and investigation): 
+The purpose of this analysis is to determine variables/factors that help estimate bikeshare useage and develop a model that predicts bikeshare useage based on certain predictor variables.
 
 
 ### State your Primary Research Question (RQ): 
@@ -36,6 +37,7 @@ Using the predictor variables available in our dataset, can we predict bikeshare
 #### Add some possible Supporting Research Questions (2-4 RQs that support problem statement): 
 * What are the main factors influencing bikesharing rates?
 * How sensitive is bikesharing to the influencing factors?
+* Are there significant differences in predicting factors for the casual versus registered populations?
 
 
 ### Business Justification: 
@@ -89,6 +91,8 @@ Data Description (describe each of your data sources, include screenshots of a f
 # APPROACH/METHODOLOGY (8 points)
 ## Planned Approach 
 (In paragraph(s), describe the approach you will take and what are the models you will try to use? Mention any data transformations that would need to happen. How do you plan to compare your models? How do you plan to train and optimize your model hyper-parameters?)
+
+First, we use a multiple linear regression model to determine which predictors are statistically significant.
 
 
 ## Anticipated Conclusions/Hypothesis 

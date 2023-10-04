@@ -37,7 +37,6 @@ Using the predictor variables available in our dataset, can we predict bikeshare
 #### Add some possible Supporting Research Questions (2-4 RQs that support problem statement): 
 * What are the main factors influencing bikesharing rates?
 * How sensitive is bikesharing to the influencing factors?
-* Are there significant differences in predicting factors for the casual versus registered populations?
 
 
 ### Business Justification: 

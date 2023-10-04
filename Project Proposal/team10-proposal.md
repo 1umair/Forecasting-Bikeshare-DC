@@ -87,9 +87,7 @@ Data Description (describe each of your data sources, include screenshots of a f
 # APPROACH/METHODOLOGY (8 points)
 ## Planned Approach 
 
-First, we use multiple linear regression to create different models. This gives an idea of the statistical significance of each variable. Next, we conduct partial F-tests and analyze the correlation coefficients between variables to find the variables with greatest explanatory power. Finally, we perform an ANOVA analysis to discover if there are differences in bikesharing between the casual and registered populations.
-
-We will also consider using recurrent neural networks, a bayesian approach, and a clustering apporach for time series forecasting.
+First, we initiate the process with thorough data collection, encompassing various factors such as weather conditions, holidays etc. Following this, we conduct exploratory data analysis to grasp the data's distribution and patterns, addressing outliers and missing values through appropriate methods. Once the exploratory data anlysis is conducted we will leverage methods such as multiple linear regression, recurrent neural networks, Bayesian modeling, and clustering methods tailored for time series forecasting. Model performance is rigorously evaluated using metrics like Mean Squared Error, with the most accurate model selected for optimization and fine-tuning. The entire process is documented comprehensively, and clear reports are generated, outlining key findings and recommendations. Through this holistic methodology, we aim to deliver precise and reliable forecast for bike-sharing usage.
 
 ## Anticipated Conclusions/Hypothesis 
 

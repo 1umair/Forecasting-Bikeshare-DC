@@ -1,7 +1,5 @@
 # MGT 6203 Group Project Proposal Template
 
-Please edit the following template to record your responses and provide details on your project plan. 
-
 # TEAM INFORMATION (1 point)
 
 Team #: 10
@@ -39,7 +37,6 @@ Using the predictor variables available in our dataset, can we predict bikeshare
 
 
 ### Business Justification: 
-(Why is this problem interesting to solve from a business viewpoint? Try to quantify the financial, marketing or operational aspects and implications of this problem, as if you were running a company, non-profit organization, city or government that is encountering this problem.)
 
 
 Increasing the fraction of trips taken by bike is beneficial to urban planners, as it reduces traffic and consequent pollution on local roads, and helps people get exercise. We want to help future bikeshare programs be able to predict demand, in order to make sure their own bikeshare programs are resourced well for peak times and days. Additionally, knowing when demand is likely to be low is also beneficial, as this helps planners know when to temporarily take bikes or docks out of commission for maintenance or upgrades with minimal impact to users.
@@ -91,7 +88,7 @@ Data Description (describe each of your data sources, include screenshots of a f
 
 First, we use multiple linear regression to create different models. This gives an idea of the statistical significance of each variable. Next, we conduct partial F-tests and analyze the correlation coefficients between variables to find the variables with greatest explanatory power. Finally, we perform an ANOVA analysis to discover if there are differences in bikesharing between the casual and registered populations.
 
-We will also consider using recurrent neural networks, a bayesian approach, and a clsutering apporach for time series forecasting
+We will also consider using recurrent neural networks, a bayesian approach, and a clustering apporach for time series forecasting
 
 ## Anticipated Conclusions/Hypothesis 
 

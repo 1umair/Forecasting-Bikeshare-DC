@@ -94,6 +94,7 @@ Data Description (describe each of your data sources, include screenshots of a f
 
 First, we use multiple linear regression to create different models. This gives an idea of the statistical significance of each variable. Next, we conduct partial F-tests and analyze the correlation coefficients between variables to find the variables with greatest explanatory power. Finally, we perform an ANOVA analysis to discover if there are differences in bikesharing between the casual and registered populations.
 
+We will also consider using recurrent neural networks, a bayesian approach, and a clsutering apporach for time series forecasting
 
 ## Anticipated Conclusions/Hypothesis 
 (what results do you expect, how will you approach lead you to determining the final conclusion of your analysis) Note: At the end of the project, you do not have to be correct or have acceptable accuracy, the purpose is to walk us through an analysis that gives the reader insight into the conclusion regarding your objective/problem statement

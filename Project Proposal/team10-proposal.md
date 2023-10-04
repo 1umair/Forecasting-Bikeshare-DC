@@ -22,6 +22,7 @@ Team Members:
 # OBJECTIVE/PROBLEM (5 points)
 
 #### Project Title: 
+Forecasting Bikesharing for Capital bikeshare system
 
 #### Background Information on chosen project topic: 
 Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.

@@ -34,7 +34,7 @@ Using the predictor variables available in our dataset, can we predict bikeshare
 
 #### Add some possible Supporting Research Questions (2-4 RQs that support problem statement): 
 * What are the main factors influencing bikesharing rates?
-* How sensitive is bikesharing to the influencing factors?
+* How sensitive is bikesharing to influencing factors such as weather or season?
 
 
 ### Business Justification: 
@@ -87,7 +87,7 @@ Data Description (describe each of your data sources, include screenshots of a f
 # APPROACH/METHODOLOGY (8 points)
 ## Planned Approach 
 
-First, we initiate the process with thorough data collection, encompassing various factors such as weather conditions, holidays etc. Following this, we conduct exploratory data analysis to grasp the data's distribution and patterns, addressing outliers and missing values through appropriate methods. Once the exploratory data anlysis is conducted we will leverage method such as multiple linear regression, recurrent neural networks, Bayesian modeling, and clustering methods tailored for time series forecasting. Model performance is rigorously evaluated using metrics like Mean Squared Error, with the most accurate model selected for optimization and fine-tuning. The entire process is documented comprehensively, and clear reports are generated, outlining key findings and recommendations. Through this holistic methodology, we aim to deliver precise and reliable forecast for bike-sharing usage.
+First, we initiate the process with thorough data collection, encompassing various factors such as weather conditions, holidays etc. Following this, we conduct exploratory data analysis to grasp the data's distribution and patterns, addressing outliers and missing values through appropriate methods. Once the exploratory data anlysis is conducted we will leverage method such as multiple linear regression, Elastic Net, recurrent neural networks, Bayesian modeling, and clustering methods tailored for time series forecasting. Model performance is rigorously evaluated using metrics like Mean Squared Error, with the most accurate model selected for optimization and fine-tuning. The entire process is documented comprehensively, and clear reports are generated, outlining key findings and recommendations. Through this holistic methodology, we aim to deliver precise and reliable forecast for bike-sharing usage.
 
 ## Anticipated Conclusions/Hypothesis 
 
@@ -96,7 +96,7 @@ We expect to find that there are strong seasonality patterns in the data, both i
 We also expect weather will influence usage - that users are more likely to use the system when there is no precipitation, and when the weather is warm.
 
 ### What business decisions will be impacted by the results of your analysis? What could be some benefits?
-Our findings would influence planning for when to add more bikes to a system as well as when it is safer to take some bikes out of commission for maintenance or upgrades. Additionally, ridership projections can also help inform revenue projections, since some riders pay per-ride.
+Our findings would influence planning for when to add more bikes to a system as well as when it is safer to take some bikes out of commission for maintenance or upgrades. Additionally, ridership projections can also help inform revenue projections, since some riders pay per-ride. Our findings would also allow us to determine when would be the best timing to market the bikeshare program to increase users.
 
 # PROJECT TIMELINE/PLANNING (2 points)
 ## Project Timeline/Mention key dates you hope to achieve certain milestones by:

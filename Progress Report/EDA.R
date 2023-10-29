@@ -46,3 +46,20 @@ corrplot(cor(numeric_weather_predictors))
 numeric_users <- day_cleaned %>% select(casual, registered, cnt)
 cor(numeric_users)
 corrplot(cor(numeric_users))
+
+# Some boxplot visualiations
+
+# Holiday usage: lower on average, but wide variance
+boxplot(cnt ~ holiday, data = day_cleaned)
+
+# Weekday usage: slightly higher on average midweek, which surprised me
+boxplot(cnt ~ weekday, data = day_cleaned)
+
+# Working day vs non-working day usage - more variance on non-working days
+boxplot(cnt ~ workingday, data = day_cleaned)
+
+# Seasonality: Note that usage is much lower for season 1. In the readme.txt
+# file, they claim that 1 is for spring, but this is a mistake. 1 is used for winter (21 Dec through 20 Mar)
+# With 2 for Spring, 3 for Summer, 4 for Fall.
+boxplot(cnt ~ season, data = day_cleaned)
+# Usage is slightly higher in summer.

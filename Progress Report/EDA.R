@@ -1,6 +1,7 @@
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 suppressMessages(library(tidyverse))
+suppressMessages(library(corrplot))
 
 day <- read_csv('../Data/day.csv')
 
@@ -33,3 +34,10 @@ hist(day_cleaned$casual) # Notice the heavy skew
 hist(day_cleaned$registered) # Closer to a normal distribution than 'casual'
 # Possibly this indicates we might want two separate models for casual and registered.
 hist(day_cleaned$cnt)
+
+# Look at weather predictor variable correlations
+numeric_weather_predictors <- day_cleaned %>% select(temp, atemp, hum, windspeed)
+cor(numeric_weather_predictors)
+corrplot(cor(numeric_weather_predictors))
+#' Logically, atemp is correlated heavily with temp, and windspeed has negative correlation
+#' with the other factors.

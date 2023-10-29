@@ -41,3 +41,8 @@ cor(numeric_weather_predictors)
 corrplot(cor(numeric_weather_predictors))
 #' Logically, atemp is correlated heavily with temp, and windspeed has negative correlation
 #' with the other factors.
+
+# Look at correlations between the respone variables for usage:
+numeric_users <- day_cleaned %>% select(casual, registered, cnt)
+cor(numeric_users)
+corrplot(cor(numeric_users))

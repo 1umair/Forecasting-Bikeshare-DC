@@ -63,3 +63,30 @@ boxplot(cnt ~ workingday, data = day_cleaned)
 # With 2 for Spring, 3 for Summer, 4 for Fall.
 boxplot(cnt ~ season, data = day_cleaned)
 # Usage is slightly higher in summer.
+
+# Let's see if it's different for casual users, since registered correlates strongly with cnt
+# Holiday: higher on holidays, as you might expect for tourists or occasional users
+boxplot(casual ~ holiday, data = day_cleaned)
+
+# Weekday: much higher on weekends than weekdays.
+boxplot(casual ~ weekday, data = day_cleaned)
+
+# Working vs non-working Day: somewhat higher on non-working days, consistent with the weekend/weekday
+boxplot(casual ~ workingday, data = day_cleaned)
+
+# Seasonality: much higher in Spring or Summer than Fall or Winter, which is consistent with DC tourist seasons.
+# We tend to get many more visitors in Spring (Cherry Blossoms, Spring Break for schools) and summer as opposed to F/W
+boxplot(casual ~ season, data = day_cleaned)
+
+# Let's kick the tires by trying some simple Linear Models
+simple_lm <- lm(registered ~ season + holiday + workingday + weathersit + temp + atemp + hum + windspeed, data = day_cleaned)
+summary(simple_lm)
+# Note the positive coefficients for seasons 2/3/4, the negative coefficient for Holiday, the positive coefficient for working day,
+# The negative coefficients for weathersit 2/3 (which are not as nice as 1). Positive coefficient for temperature, negative for humidity and windspeed.
+# Of course, with the multicollinearity we observed earlier, I am sure our ultimate model will not use all of these predictors, although
+# We may want to consider some interaction terms.
+simple_lm_casual <- lm(casual ~ season + holiday + workingday + weathersit + temp + atemp + hum + windspeed, data = day_cleaned)
+summary(simple_lm_casual)
+# It is interesting that a simple linear regression does better at predicting casual usage. We see more of the predictors are statistically significant at
+# p < .01 or even p < .001. This does reinforce my suspicion that we should be building multiple models.
+# Again, with heteroskedacity we wouldn't want all these in our final models.

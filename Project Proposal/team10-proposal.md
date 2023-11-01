@@ -56,7 +56,7 @@ Data Description (describe each of your data sources, include screenshots of a f
     
     - instant: record index
     - dteday : date
-    - season : season (1:springer, 2:summer, 3:fall, 4:winter)
+    - season : season (1:winter, 2:spring, 3:summer, 4:fall)
     - yr : year (0: 2011, 1:2012)
     - mnth : month ( 1 to 12)
     - hr : hour (0 to 23)

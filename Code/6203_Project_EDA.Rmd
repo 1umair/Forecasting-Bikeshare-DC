@@ -1,0 +1,63 @@
+
+## Read data
+
+```{r cars}
+data = read.csv("days.csv")
+```
+
+## Fit multiple linear regression model
+
+```{r pressure, echo=FALSE}
+data$season<-as.factor(data$season)
+data$yr<-as.factor(data$yr)
+data$mnth<-as.factor(data$mnth)
+data$holiday<-as.factor(data$holiday)
+data$weekday<-as.factor(data$weekday)
+data$weathersit<-as.factor(data$weathersit)
+
+
+
+
+
+model = lm(cnt ~ season + yr + mnth + holiday + weekday+ workingday+weathersit+temp+atemp+hum+windspeed, data = data)
+summary(model)
+```
+.8484 of the variation in count can be explained by the predictors.
+
+The most significant variables are windspeed, weathersit, and humidity. 
+
+## Let's check for correlation between independent variables in the model
+
+```{r}
+# install.packages('GGally')
+library(GGally)
+data_x = data[3:13]
+ggpairs(data_x, aes( alpha = 0.2), lower=list(combo=wrap("facethist",  binwidth=0.5)))
+```
+
+We notice that atemp and temp and highly correlated
+
+## Let's check for multicolinearity
+
+```{r error=TRUE}
+library(car)
+vif(model)
+```
+
+The VIF function throws an error - this suggests some perfect multicolinearity. 
+Let's see what variable is causing the issue.
+
+```{r}
+ld.vars <- attributes(alias(model)$Complete)$dimnames[[1]]
+ld.vars
+```
+
+Workingday is linearly dependent variable. Let's try VIF after removing the variable.
+
+```{r}
+model2 = lm(cnt ~ season + yr + mnth + holiday + weekday+weathersit+temp+atemp+hum+windspeed, data = data)
+```
+```{r}
+vif(model2)
+```
+VIF values larger than 10 are a sign for high, not tolerable correlation of model predictors, therefore season, mnth, temp, and atemp are poor predictors to use.

@@ -1,0 +1,36 @@
+﻿
+MGT 6203: Progress Report
+Umair Zakir Abowath-Josh Blakely-Daniel Garrison-Eric Loui- Adam Peir
+
+I. Introduction
+1. Brief Overview of the Project
+
+II. Current Status of the Project
+A. Data Cleaning and Preprocessing
+B. Exploratory Data Analysis/Visualizations
+C. Key Findings/Adjustments
+D. Challenges Encountered
+
+III. Ongoing Work
+A. Intermediate Data Preparation
+B. Preliminary Modeling
+C. Expected Milestones and Deliverables
+
+IV. Explanation and Background Information
+A. Provide Background on the Statistical Models Used
+B. Explain the Methodology and Approach
+C. Justify the Selection of Models and Techniques
+
+V. Works Cited
+A. Cite any sources, literature, or prior work that informed your project
+
+Introduction
+
+
+Current Status of the Project
+
+Ongoing Work 
+
+Explanation and Background Information
+ 
+Works Cited

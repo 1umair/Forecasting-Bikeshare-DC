@@ -33,9 +33,25 @@ VI. Works Cited
 
 # Current Status of the Project
 
+## Data Cleaning and Preprocessing
+    The dataset has required minimal cleaning. We had to convert several variables into factor variables (season, holiday, weekday, workingday, weather). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct.
+
+## EDA / Visualization
+
+    Not all of our predictors or response variables are distributed normally. In particular, humidity exhibits leftward skew, and windspeed exhibits rightward skew.
+
+    Casual users exhibit rightward skew, while registered users are not too far from the normal distribution.
+
+    Preliminary EDA reveals strong seasonality - overall usage on a daily basis is much higher in spring/summer than fall and much more than winter. 
+
+    Generally, casual users exhibit vastly different usage patterns from the baseline (registered users), indicating we may want a separate model for casual users.
 
 # Ongoing Work 
 
+    Anticipated challenges:
+
+    * Distinguishing between the influences of weather and the influence of the season, particularly on casual usage. DC has many visitors in Spring and Summer who would show up under the casual response variable.
+    * Accounting for the overall increase in usage over the two years spanning our dataset. The dataset was collected towards the beginning of the Capital Bikeshare program, so findings we draw from the overall increasing usage would not necessarily translate directly to mature systems.
 
 # Explanation and Background Information
 
@@ -49,7 +65,7 @@ Existing literature around bikeshare usage generally emphasizes the following:
 * Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit), which can be too hot
 * Precipitation of any amount discourages cycling
 * High humidity has a negative effect on cycling
-* High winds can have a negative effect on cycling; we do not have wind data in our dataset
+* High winds can have a negative effect on cycling
 * Usage is often higher in spring and summer, and lowest in winter
 
 # Works Cited

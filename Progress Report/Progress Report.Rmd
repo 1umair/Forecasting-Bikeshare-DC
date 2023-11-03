@@ -50,9 +50,12 @@ V. Literature Review Summary
 VI. Works Cited
 
 # Introduction
+Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
 
+The purpose of this analysis is to determine variables/factors that help estimate bikeshare useage and develop a model that predicts bikeshare useage based on certain predictor variables.
 
 # Current Status of the Project
+Currently, the dataset has undergone exploratory data analysis and data cleaning. We've identified predictors that may impact a potential model's goodness of fit and converted some variables into categorical variables.
 
 ## Data Cleaning and Preprocessing
 The dataset has required minimal cleaning. We had to convert several variables into factor variables (season, holiday, weekday, workingday, weather). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct.
@@ -113,6 +116,19 @@ df_h |>
     subtitle = "Given Weekday and Season"
   )
 ```
+Next, let's verify these findings by conducting an ANOVA and pairwise analysis.
+```{r}
+model = aov(df_h$total_count ~ df_h$season, data = df_h)
+summary(model)
+```
+The p-value of the F-statistic for season is very small and statistically significant.At least one group mean is different from the rest.
+
+Next, we compare the means of each pair of seasons.
+
+```{r}
+TukeyHSD(model)
+```
+From the Tukey method, all the pairs are statistically different except the fall-spring pair. This confirms the visual in the box plot, where we see similar distributions in fall and spring.
 
 We can see by the above given boxplot, that the data appears to be evenly spread out between each weekday and across all the seasons. This shows that in general each day will yield approximately the same number of riders, which will help increase our profit. The question though is do we see a difference between casual and registered users.
 

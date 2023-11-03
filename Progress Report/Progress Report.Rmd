@@ -1,4 +1,4 @@
----
+--
 header-includes:
 - \usepackage{fancyhdr}
 - \usepackage{relsize}
@@ -61,7 +61,7 @@ Currently, the dataset has undergone exploratory data analysis and data cleaning
 The dataset has required minimal cleaning. We had to convert several variables into factor variables (season, holiday, weekday, workingday, weather). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct.
 
 ```{r prepare_data, echo=FALSE, include=FALSE}
-df_h <- read_csv("../Data/hour.csv") |>
+df_h <- read_csv("hour.csv") |>
   rename(
     weather = weathersit,
     total_count = cnt
@@ -73,7 +73,6 @@ df_h <- read_csv("../Data/hour.csv") |>
     workingday = as.factor(workingday),
     weather = as.factor(weather)
   )
-
 levels(df_h$season) <- c('winter', 'spring', 'summer', 'fall')
 levels(df_h$workingday) <- c('weekend or holiday', 'weekday')
 levels(df_h$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
@@ -157,6 +156,69 @@ grid.arrange(registered, casual, nrow=2)
 ```
 
 We can see above that the majority of the `casual` user's usage is on the weekend, and the registered user uses them consistently throughout the week. This indicates that we might need to look at different models depending on the user type. We might see a little more non-linearity with casual users than with the registered users.
+
+# Preliminary Time Series Forecasting
+
+We have started with a simple time series forecasting model using the day wise usage data. We have used arima to forecast for on the last 51 days of the year. We understand from the data analysis that we have conducted above that seasonal effects do have an effect on the usage.
+```{r Premilinary Time series forecasting day wise, echo=F, fig.align="center"}
+# Load necessary libraries
+library(forecast)
+
+# Load the data
+day <- read.csv("day.csv")
+
+# Split the data into training and testing sets
+train_data <- day[1:680, ]  # Adjust the number of training samples
+test_data <- day[681:731, ]  # Adjust the number of testing samples
+
+train_ts <- ts(train_data$cnt, frequency = 7)
+test_ts <- ts(test_data$cnt, frequency = 7)
+
+# Choose a forecasting model (ARIMA in this example)
+bike_model <- auto.arima(train_ts)
+
+# Make forecasts
+forecasted_values <- forecast(bike_model, length(test_ts))
+#forecasted_values
+# Evaluate the model
+
+accuracy(forecasted_values$mean, test_data$cnt)
+
+# Visualization
+# plot(forecasted_values$mean, main = "Daily Bike-Sharing Demand Forecast",
+#      xlab = "Date", ylab = "Demand Count")
+
+# plot(test_data$cnt, main = "Daily Bike-Sharing Actual Demand",
+#      xlab = "Date", ylab = "Demand Count", type = "l")
+
+
+combined_data <- data.frame(
+  Date = seq_along(forecasted_values$mean),
+  Forecasted = forecasted_values$mean,
+  Actual = test_data$cnt
+)
+
+# Create a ggplot with forecasted and actual values
+a <- ggplot(combined_data, aes(x = Date)) +
+  geom_line(aes(y = Forecasted), color = "black", linetype = "solid") +
+  geom_line(aes(y = Actual), color = "blue", linetype = "solid") +
+  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1) +
+  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Forecasted)-10, label = "Forecasted"), vjust = 1) +
+  labs(
+    title = "Daily Bike-Sharing Demand Forecast",
+    x = "Date",
+    y = "Demand Count"
+  ) +
+  scale_color_manual(values = c("black", "blue")) +
+  theme_minimal()
+suppressWarnings({
+  print(a)
+})
+
+  
+```
+
+The initial results of a time series forecasting model on a day level depicts that our accuracy is pretty low and especially it is unable to guage the seasonal effects in the data especially the sudden drop of usage in winters. In order to improve our models we will now explore different modeling techniques such as Decision tree/Ensemble trees and use train and test data set that has all the components of seasons and other time level factors. In addition to this, we will also try to improve on the time series model by either exploring the hourly patters and forecasting for usage for a particular hours in a day. Lastly, we will delve into getting more years of data which will allow us to capture the seasonal and time based patterns of usage in the model.
 
 # Ongoing Work 
 

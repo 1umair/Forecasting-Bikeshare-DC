@@ -1,0 +1,173 @@
+---
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{relsize}
+- \usepackage{algorithm}
+- \usepackage{algorithmic}
+- \pagestyle{fancy}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+- \headheight 35pt
+- \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir}
+- \fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Progress Report}}
+- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023}
+- \fancyfoot[RE,RO]{\small \thepage}
+- \fancyfoot[CE,CO]{}
+- \headsep 1.5em
+output: pdf_document
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+require(gridExtra)
+```
+# Forecasting Bikesharing Usage for DC's Capital Bikshare System
+
+# Table of Contents
+I. Introduction
+1. Brief Overview of the Project
+
+II. Current Status of the Project
+A. Data Cleaning and Preprocessing
+B. Exploratory Data Analysis/Visualizations
+C. Key Findings/Adjustments
+D. Challenges Encountered
+
+III. Ongoing Work
+A. Intermediate Data Preparation
+B. Preliminary Modeling
+C. Expected Milestones and Deliverables
+
+IV. Explanation and Background Information
+A. Provide Background on the Statistical Models Used
+B. Explain the Methodology and Approach
+C. Justify the Selection of Models and Techniques
+
+V. Literature Review Summary
+
+VI. Works Cited
+
+# Introduction
+
+
+# Current Status of the Project
+
+## Data Cleaning and Preprocessing
+The dataset has required minimal cleaning. We had to convert several variables into factor variables (season, holiday, weekday, workingday, weather). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct.
+
+```{r prepare_data, echo=FALSE, include=FALSE}
+df_h <- read_csv("../Data/hour.csv") |>
+  rename(
+    weather = weathersit,
+    total_count = cnt
+  ) |>
+  mutate(
+    season = factor(season),
+    holiday = as.factor(holiday),
+    weekday = as.factor(weekday),
+    workingday = as.factor(workingday),
+    weather = as.factor(weather)
+  )
+
+levels(df_h$season) <- c('winter', 'spring', 'summer', 'fall')
+levels(df_h$workingday) <- c('weekend or holiday', 'weekday')
+levels(df_h$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
+levels(df_h$holiday) <- c('non-holiday', 'holiday')
+levels(df_h$weather) <- c('clear', 'misty', 'light rain', 'heavy rain')
+```
+
+## EDA / Visualization
+
+Not all of our predictors or response variables are distributed normally. In particular, humidity exhibits leftward skew, and windspeed exhibits rightward skew.
+
+Casual users exhibit rightward skew, while registered users are not too far from the normal distribution.
+
+Preliminary EDA reveals strong seasonality - overall usage on a daily basis is much higher in spring/summer than fall and much more than winter. 
+
+We wanted to look at the overall bike usage as it relates to seasonality. We had the hypothesis that we would have more users in the summer than in the winter. Looking at the plot below, we can see that not only do we have the max bike usage during the summer, but we also seem to have an increase to bike usage as the service becomes more mature.
+
+```{r seasonality_daily_usage, echo=F, out.width="75%", fig.align="center"}
+ggplot(data = df_h, mapping = aes(x = instant, y = total_count)) +
+  geom_point(aes(color = season)) +
+  labs(
+    x = "Day as Integer",
+    y = "Total number of bike per day",
+    color = "Season",
+    title = "Review the seasonality of bike usage",
+    subtitle = "On a daily usage."
+  )
+```
+
+The next thing we wanted to take a look at is see whether the day of the week had a large impact on the total bike usage. This is important to see whether a specific day will have the majority of usage or if they are relatively evenly spread out. Ideally we want to see the data spread out. This would allow us to increase on the capitalization of renting our bikes every day.
+
+```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
+df_h |>
+  ggplot(mapping = aes(weekday, total_count, color = season)) +
+  geom_boxplot() +
+  labs(
+    x = "Weekday",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Given Weekday and Season"
+  )
+```
+
+We can see by the above given boxplot, that the data appears to be evenly spread out between each weekday and across all the seasons. This shows that in general each day will yield approximately the same number of riders, which will help increase our profit. The question though is do we see a difference between casual and registered users.
+
+```{r casual_vs_registered, echo=F, fig.align="center"}
+registered <- df_h |>
+  ggplot(mapping = aes(x = weekday, y = registered, color = season)) +
+  geom_boxplot() +
+  labs(
+    x = "",
+    y = "Registered Users",
+    title = "Registered Users vs Casual Users",
+    subtitle = "Based on Weekday and Seasonality"
+  ) +
+  theme(
+    axis.text.x = element_blank()
+  )
+casual <- df_h |>
+  ggplot(mapping = aes(x = weekday, y = casual, color = season)) +
+  geom_boxplot() +
+  labs(
+    x = "Weekday",
+    y = "Casual Users"
+  )
+grid.arrange(registered, casual, nrow=2)
+  
+```
+
+We can see above that the majority of the `casual` user's usage is on the weekend, and the registered user uses them consistently throughout the week. This indicates that we might need to look at different models depending on the user type. We might see a little more non-linearity with casual users than with the registered users.
+
+# Ongoing Work 
+
+Anticipated challenges:
+
+* Distinguishing between the influences of weather and the influence of the season, particularly on casual usage. DC has many visitors in Spring and Summer who would show up under the casual response variable.
+* Accounting for the overall increase in usage over the two years spanning our dataset. The dataset was collected towards the beginning of the Capital Bikeshare program, so findings we draw from the overall increasing usage would not necessarily translate directly to mature systems.
+
+# Explanation and Background Information
+
+# Literature Review Summary
+
+Existing literature around bikeshare usage generally emphasizes the following:
+
+* Time of day is typically the most important predictor, but different days of the week have different trends based on time of day
+* Specifically, usage is often bimodal on weekdays reflecting commuter patterns
+* Usage is not bimodal on weekends, typically with the highest value in mid-afternoon.
+* Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit), which can be too hot
+* Precipitation of any amount discourages cycling
+* High humidity has a negative effect on cycling
+* High winds can have a negative effect on cycling
+* Usage is often higher in spring and summer, and lowest in winter
+
+# Works Cited
+
+Bean, R., Pojani, D., & Corcoran, J. (2021). How does weather affect bikeshare use? A comparative analysis of forty cities across climate zones. _Journal of Transport Geography_, 95. https://doi.org/10.1016/j.jtrangeo.2021.103155.
+
+Eren, E., & Uz, V. E. (2020). A review on bike-sharing: The factors affecting bike-sharing demand. _Sustainable Cities and Society_, 54. https://doi.org/10.1016/j.scs.2019.101882
+
+Ashgar, H. I., Elhenawy, M., & Rakha, H. A. (2019). Modeling bike counts in a bike-sharing system considering the effect of weather conditions. _Case Studies on Transport Policy_, 7(2), 261-268. https://doi.org/10.1016/j.cstp.2019.02.011

@@ -1,5 +1,6 @@
 library(tidyverse)
 library(ggplot2)
+require(gridExtra)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 df <- read_csv("../Data/day.csv") |>
@@ -144,7 +145,34 @@ df_h |>
 # How does the usage for all seasons look based on day of the week
 df_h |>
   ggplot(mapping = aes(weekday, total_count, color = season)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(
+    x = "Weekday",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Given Weekday and Season"
+  )
+
+registered <- df_h |>
+  ggplot(mapping = aes(x = weekday, y = registered, color = season)) +
+  geom_boxplot() +
+  labs(
+    x = "",
+    y = "Registered Users",
+    title = "Registered Users vs Casual Users",
+    subtitle = "Based on Weekday and Seasonality"
+  ) +
+  theme(
+    axis.text.x = element_blank()
+  )
+casual <- df_h |>
+  ggplot(mapping = aes(x = weekday, y = casual, color = season)) +
+  geom_boxplot() +
+  labs(
+    x = "Weekday",
+    y = "Casual Users"
+  )
+grid.arrange(registered, casual, nrow=2)
 
 # How does the usage differ between holiday and non-holiday
 df_h |>
@@ -155,6 +183,12 @@ df_h |>
 df_h |>
   ggplot(mapping = aes(x = weather, y = total_count)) +
   geom_boxplot()
+
+# What about causal riders vs registered riders
+df_h |>
+  ggplot() +
+  # geom_boxplot(mapping = aes(x = weekday, y = casual, color = season)) #+
+  geom_boxplot(mapping = aes(x = weekday, y = registered, color = season))
 
 # Heat map of weather and weekday.
 df_h |>

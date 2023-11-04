@@ -36,7 +36,7 @@ library(broom)
 
 Bikesharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. The riding of bikes helps to improve the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
 
-The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that predicts bikeshare usage based on certain predictor variables.
+The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that predicts the usage based on certain predictor variables.
 
 # Current Status of the Project
 
@@ -44,7 +44,7 @@ Currently, the dataset has undergone exploratory data analysis and data cleaning
 
 ## Data Cleaning and Preprocessing
 
-The dataset has required minimal cleaning. We had to convert several variables into factor variables (`season`, `holiday`, `weekday`, `workingday`, `weather`). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct. Fortunately, there was no missing data.
+The dataset has required minimal cleaning. We had to convert several variables into factor variables (`season`, `holiday`, `weekday`, `workingday`, `weather`). Additionally we noted that the key for our dataset mislabeled the season variable, which was trivial to correct. Fortunately, there was no missing data.
 
 ```{r prepare_data, echo=FALSE, include=FALSE}
 df_h <- read_csv("../data/hour.csv") |>
@@ -120,7 +120,7 @@ grid.arrange(hum, ws, ncol=2)
 temp
 ```
 
-Not all of our predictors or response variables are distributed normally. In particular, humidity exhibits leftward skew, and windspeed exhibits rightward skew.
+Not all of our predictors or response variables are distributed normally. In particular, `humidity` exhibits leftward skew, and `windspeed` exhibits rightward skew.
 
 ```{r usage_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
 day |>
@@ -138,7 +138,7 @@ day |>
 
 Casual users exhibit rightward skew, while registered users are not too far from the normal distribution.
 
-We wanted to look at the overall bike usage as it relates to seasonality. We had the hypothesis that we would have more users in the summer than in the winter. Looking at the plot below, we can see that not only do we have the max bike usage during the summer, but we also seem to have an increase to bike usage as the service becomes more mature.
+We wanted to look at the overall bike usage as it relates to seasonality. We had the hypothesis that we would have more users in the summer than in the winter. Looking at the plot below, we can see that not only do we have the max bike usage during the summer, but we also seem to have a year-over-year increase to the usage as the service matures.
 
 ```{r seasonality_daily_usage, echo=F, out.width="75%", fig.align="center"}
 ggplot(data = df_h, mapping = aes(x = instant, y = total_count)) +
@@ -152,7 +152,7 @@ ggplot(data = df_h, mapping = aes(x = instant, y = total_count)) +
   )
 ```
 
-The next thing we wanted to take a look at is see whether the day of the week had a large impact on the total bike usage. This is important to see whether a specific day will have the majority of usage or if they are relatively evenly spread out. Ideally we want to see the data spread out. This would allow us to increase on the capitalization of renting our bikes every day.
+The next thing we wanted to take a look at is see whether the day of the week had a large impact on the total bike usage. Total bike usage is the combination of the `registered` and `casual` users. This is important to see whether a specific day will have the majority of usage or if they are relatively evenly spread out. Ideally we want to see the data spread out. This would allow us to increase on the capitalization of renting our bikes every day.
 
 ```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
 df_h |>
@@ -166,7 +166,9 @@ df_h |>
   )
 ```
 
-Next, let's verify these findings by conducting an ANOVA and pairwise analysis.
+We can see by the above given boxplot, that the data appears to be evenly spread out between each weekday and across all the seasons. This shows that in general each day will yield approximately the same number of riders, which will help increase our profit. 
+
+We can also verify these findings by conducting an ANOVA and pairwise analysis.
 
 ```{r aov, echo=F, out.width="75%", fig.align="center"}
 model = aov(df_h$total_count ~ df_h$season, data = df_h)
@@ -188,7 +190,7 @@ TukeyHSD(model) |>
 ```
 From the Tukey method, all the pairs are statistically different except the fall-spring pair. This confirms the visual in the box plot, where we see similar distributions in fall and spring.
 
-We can see by the above given boxplot, that the data appears to be evenly spread out between each weekday and across all the seasons. This shows that in general each day will yield approximately the same number of riders, which will help increase our profit. The question though is do we see a difference between casual and registered users.
+The next question though is do we see a difference between `casual` and `registered` users.
 
 ```{r casual_vs_registered, echo=F, fig.align="center"}
 registered <- df_h |>
@@ -214,7 +216,7 @@ grid.arrange(registered, casual, nrow=2)
   
 ```
 
-We can see above that the majority of the `casual` user's usage is on the weekend, and the registered user uses them consistently throughout the week. This indicates that we might need to look at different models depending on the user type. We might see a little more non-linearity with casual users than with the registered users.
+We can see above that the majority of the `casual` user's usage is on the weekend, and the `registered` user use the bikes consistently throughout the week. This indicates that we might need to look at different models depending on the user type. We might see a little more non-linearity with casual users than with the registered users.
 
 ## Preliminary Time Series Forecasting
 
@@ -254,8 +256,6 @@ combined_data <- data.frame(
 a <- ggplot(combined_data, aes(x = Date)) +
   geom_line(aes(y = Forecasted, color = 'Forecasted'), linetype = "solid", show.legend = TRUE) +
   geom_line(aes(y = Actual, color = 'Actual'), linetype = "solid") +
-  # geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1, color = "blue") +
-  # geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Forecasted)-10, label = "Forecasted"), vjust = 1) +
   scale_color_manual("", values = c("black", "blue")) +
   labs(
     title = "Daily Bike-Sharing Demand Forecast",
@@ -268,19 +268,19 @@ suppressWarnings({
 })
 ```
 
-There is a lot improvement to go with building and fine tuning our models. 
+There is a lot of room for improvement with building and fine tuning our models. 
 
 # Ongoing Work 
 
 Anticipated challenges:
 
-* Distinguishing between the influences of weather and the influence of the season, particularly on casual usage. DC has many visitors in Spring and Summer who would show up under the casual response variable.
+* Distinguishing between the influences of `weather` and the influence of the seasons, particularly on `casual` usage. DC has many visitors in Spring and Summer who would show up under the casual response variable.
 
 * Accounting for the overall increase in usage over the two years spanning our dataset. The dataset was collected towards the beginning of the Capital Bikeshare program, so findings we draw from the overall increasing usage would not necessarily translate directly to mature systems.
 
 ## Future Modeling
 
-The initial results of a time series forecasting model on a day level depicts that our accuracy is pretty low. It is also unable to gauge the seasonal effects in the data, e.g. the sudden drop of usage in winters. In order to improve our models we will explore different modeling techniques such as Decision tree/Ensemble trees. The models will have train and test data set that has all the components of seasons and other time level factors. In addition to this, we will also try to improve on the time series model by either exploring the hourly patterns and forecasting the usage for a particular hours in a day. Lastly, we will consider getting more years of data which will allow us to capture the seasonal and time based patterns of usage in the model. We have found more data for the DC Capital Bike Share program, but it doesn't include any weather forecasts. Therefore, depending on the functionality of the model we may or may not use that data (can find the extra data [here: capitalbikeshare-data](https://s3.amazonaws.com/capitalbikeshare-data/index.html)). This will require the pulling of additional weather data to be used along with the bike data.
+The initial results of a time series forecasting model on a day level depicts that our accuracy is pretty low. It is also unable to determine the seasonal effects in the data, e.g. the sudden drop of usage in winters. In order to improve our models we will explore different modeling techniques such as Decision tree/Ensemble trees. The models will have a train and test data set that has all the components of seasons and other time level factors. In addition to this, we will also try to improve on the time series model by either exploring the hourly patterns and forecasting the usage for a particular hours in a day. Lastly, we will consider getting more years of data which will allow us to capture the seasonal and time based patterns of usage in the model. We have found more data for the DC Capital Bike Share program, but it doesn't include any weather forecasts. Therefore, depending on the functionality of the model we may or may not use that data (can find the extra data [here: capitalbikeshare-data](https://s3.amazonaws.com/capitalbikeshare-data/index.html)). This will require the pulling of additional weather data to be used along with the bike data.
 
 Additionally, as mentioned above, the two different response variables `registered` and `casual` exhibit significant differences and likely warrant building two separate models. Due to the correlation of our temperature variables with seasons (logically) we may needs to consider variable selection techniques to reduce the number of factors down.
 

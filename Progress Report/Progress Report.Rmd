@@ -19,6 +19,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggplot2)
 require(gridExtra)
+library(kableExtra)
+library(broom)
 ```
 # Forecasting Bikesharing Usage for DC's Capital Bikshare System
 
@@ -32,17 +34,17 @@ require(gridExtra)
 
 # Introduction
 
-Bikesharing systems are an increasingly popular solution in major urban areas to increase trips taken by bike, which can help people get around without cars, thus improving the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
+Bikesharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. The riding of bikes helps to improve the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We hope to use data from the DC Capital Bikeshare in 2011 and 2012 to predict bikeshare usage system-wide.
 
-The purpose of this analysis is to determine variables/factors that help estimate bikeshare useage and develop a model that predicts bikeshare useage based on certain predictor variables.
+The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that predicts bikeshare usage based on certain predictor variables.
 
 # Current Status of the Project
 
-Currently, the dataset has undergone exploratory data analysis and data cleaning. We've identified predictors that may impact a potential model's goodness of fit and converted some variables into categorical variables.
+Currently, the dataset has undergone exploratory data analysis and data cleaning. We've identified predictors that may impact a potential model's goodness of fit and converted some variables into categorical variables. We have also applied very basic ARIMA and Linear Regression models to get an idea of the data. These models are very basic, but can be used to help guide the refinement of the model and the selection of the independent variables.
 
 ## Data Cleaning and Preprocessing
 
-The dataset has required minimal cleaning. We had to convert several variables into factor variables (season, holiday, weekday, workingday, weather). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct. Fortunately, there was no missing data.
+The dataset has required minimal cleaning. We had to convert several variables into factor variables (`season`, `holiday`, `weekday`, `workingday`, `weather`). Additionally we noted that the data key for our dataset mislabeled the season factor variable, which was trivial to correct. Fortunately, there was no missing data.
 
 ```{r prepare_data, echo=FALSE, include=FALSE}
 df_h <- read_csv("../data/hour.csv") |>
@@ -62,36 +64,79 @@ levels(df_h$workingday) <- c('weekend or holiday', 'weekday')
 levels(df_h$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
 levels(df_h$holiday) <- c('non-holiday', 'holiday')
 levels(df_h$weather) <- c('clear', 'misty', 'light rain', 'heavy rain')
+
+day <- read_csv("../data/day.csv") |>
+  rename(
+    weather = weathersit,
+    total_count = cnt
+  ) |>
+  mutate(
+    season = factor(season),
+    holiday = as.factor(holiday),
+    weekday = as.factor(weekday),
+    workingday = as.factor(workingday),
+    weather = as.factor(weather)
+  )
+levels(day$season) <- c('winter', 'spring', 'summer', 'fall')
+levels(day$workingday) <- c('weekend or holiday', 'weekday')
+levels(day$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
+levels(day$holiday) <- c('non-holiday', 'holiday')
+levels(day$weather) <- c('clear', 'misty', 'light rain', 'heavy rain')
 ```
 
 ## EDA / Visualization
 
-```{r hist, echo=FALSE, results='hide', message =FALSE, out.width="33%", fig.align="center"}
-day <- read_csv('../Data/day.csv')
+```{r hist, echo=FALSE, results='hide', message=FALSE, out.width="50%", fig.align="center"}
+temp <- day |>
+  ggplot() +
+  geom_histogram(mapping = aes(temp, fill="Actual"), alpha = 0.5) +
+  geom_histogram(mapping = aes(atemp, fill= "Feels Like"), alpha = 0.5) +
+  scale_fill_manual("Temperature", values = c("red", "blue")) +
+  labs(
+    x = "Normalized Temperature (C)",
+    y = "Density",
+    title = "Histogram of Normalized Temperature in Celcius",
+    subtitle = "Feels and Actual Temperature",
+  )
 
-day_cleaned <- day[-1] %>% mutate(season = as.factor(season)) %>%
-  mutate(holiday = as.factor(holiday)) %>%
-  mutate(weekday = as.factor(weekday)) %>%
-  mutate(workingday = as.factor(workingday)) %>%
-  mutate(weathersit = as.factor(weathersit))
+hum <- day |>
+  ggplot() +
+  geom_histogram(mapping = aes(hum)) +
+  labs(
+    x = "Normalized Humidity",
+    y = "Density",
+    title = "Histogram of Normalized Humidity"
+  )
 
-
-hist(day_cleaned$temp)
-hist(day_cleaned$atemp)
-hist(day_cleaned$hum)
-hist(day_cleaned$windspeed)
+ws <- day |>
+  ggplot(mapping = aes(windspeed)) +
+  geom_histogram() +
+  labs(
+    x = "Normalized Wind Speed",
+    y = "Density",
+    title = "Histogram of Normalized Wind Speed"
+  )
+grid.arrange(hum, ws, ncol=2)
+temp
 ```
 
 Not all of our predictors or response variables are distributed normally. In particular, humidity exhibits leftward skew, and windspeed exhibits rightward skew.
 
-```{r usage_hist, echo=F, out.width="33%", fig.align="center"}
-hist(day_cleaned$casual) # Notice the heavy skew
-hist(day_cleaned$registered) # Closer to a normal distribution than 'casual'
+```{r usage_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
+day |>
+  ggplot() +
+  geom_histogram(mapping = aes(total_count, fill="Total"), alpha = 0.5) +
+  geom_histogram(mapping = aes(casual, fill="Casual"), alpha = 0.5) +
+  geom_histogram(mapping = aes(registered, fill= "Registered"), alpha = 0.5) +
+  scale_fill_manual("Rider Type", values = c("green", "red", "blue")) +
+  labs(
+    x = "Bike Usage per Day",
+    y = "Density",
+    title = "Total vs Casual vs Registered Users"
+  )
 ```
 
 Casual users exhibit rightward skew, while registered users are not too far from the normal distribution.
-
-Preliminary EDA reveals strong seasonality - overall usage on a daily basis is much higher in spring/summer than fall and much more than winter. 
 
 We wanted to look at the overall bike usage as it relates to seasonality. We had the hypothesis that we would have more users in the summer than in the winter. Looking at the plot below, we can see that not only do we have the max bike usage during the summer, but we also seem to have an increase to bike usage as the service becomes more mature.
 
@@ -100,7 +145,7 @@ ggplot(data = df_h, mapping = aes(x = instant, y = total_count)) +
   geom_point(aes(color = season)) +
   labs(
     x = "Day as Integer",
-    y = "Total number of bike per day",
+    y = "Total number of bike per hour",
     color = "Season",
     title = "Review the seasonality of bike usage",
     subtitle = "On a daily usage."
@@ -120,17 +165,26 @@ df_h |>
     subtitle = "Given Weekday and Season"
   )
 ```
+
 Next, let's verify these findings by conducting an ANOVA and pairwise analysis.
+
 ```{r aov, echo=F, out.width="75%", fig.align="center"}
 model = aov(df_h$total_count ~ df_h$season, data = df_h)
-summary(model)
+model |>
+  tidy() |>
+  kable(
+    col.names = c("Terms", "DoF", "Sum Sq", "Mean Sq", "F-Value", "Pr(>F)")
+  )
 ```
-The p-value of the F-statistic for season is very small and statistically significant.At least one group mean is different from the rest.
+
+The p-value of the F-statistic for season is very small and statistically significant. At least one group mean is different from the rest.
 
 Next, we compare the means of each pair of seasons.
 
 ```{r tukey, echo=F, out.width="75%", fig.align="center"}
-TukeyHSD(model)
+TukeyHSD(model) |>
+  tidy() |>
+  kable()
 ```
 From the Tukey method, all the pairs are statistically different except the fall-spring pair. This confirms the visual in the box plot, where we see similar distributions in fall and spring.
 
@@ -164,9 +218,9 @@ We can see above that the majority of the `casual` user's usage is on the weeken
 
 ## Preliminary Time Series Forecasting
 
-We have started with a simple time series forecasting model using the day wise usage data. We have used ARIMA to forecast for on the last 51 days of the year. We understand from the data analysis that we have conducted above that seasonal effects do have an effect on the usage.
+We have started with a simple time series forecasting model using the day wise usage data. We have used ARIMA to forecast for the last 51 days of the year. We understand from the data analysis that we have conducted above that seasonal effects do have an effect on the usage.
 
-```{r Premilinary Time series forecasting day wise, echo=F, fig.align="center", message=FALSE}
+```{r Premilinary Time series forecasting day wise, echo=F, fig.align="center", message=FALSE, out.width="75%"}
 # Load necessary libraries
 library(forecast)
 
@@ -185,19 +239,11 @@ bike_model <- auto.arima(train_ts)
 
 # Make forecasts
 forecasted_values <- forecast(bike_model, length(test_ts))
-#forecasted_values
-# Evaluate the model
 
+# Evaluate the model
 accuracy(forecasted_values$mean, test_data$cnt)
 
 # Visualization
-# plot(forecasted_values$mean, main = "Daily Bike-Sharing Demand Forecast",
-#      xlab = "Date", ylab = "Demand Count")
-
-# plot(test_data$cnt, main = "Daily Bike-Sharing Actual Demand",
-#      xlab = "Date", ylab = "Demand Count", type = "l")
-
-
 combined_data <- data.frame(
   Date = seq_along(forecasted_values$mean),
   Forecasted = forecasted_values$mean,
@@ -206,9 +252,9 @@ combined_data <- data.frame(
 
 # Create a ggplot with forecasted and actual values
 a <- ggplot(combined_data, aes(x = Date)) +
-  geom_line(aes(y = Forecasted), color = "black", linetype = "solid") +
+  geom_line(aes(y = Forecasted), color = "black", linetype = "solid", show.legend = TRUE) +
   geom_line(aes(y = Actual), color = "blue", linetype = "solid") +
-  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1) +
+  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1, color = "blue") +
   geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Forecasted)-10, label = "Forecasted"), vjust = 1) +
   labs(
     title = "Daily Bike-Sharing Demand Forecast",
@@ -220,10 +266,9 @@ a <- ggplot(combined_data, aes(x = Date)) +
 suppressWarnings({
   print(a)
 })
-
-  
 ```
 
+There is a lot improvement to go with building and fine tuning our models. 
 
 # Ongoing Work 
 
@@ -235,9 +280,9 @@ Anticipated challenges:
 
 ## Future Modeling
 
-The initial results of a time series forecasting model on a day level depicts that our accuracy is pretty low and especially it is unable to gauge the seasonal effects in the data especially the sudden drop of usage in winters. In order to improve our models we will now explore different modeling techniques such as Decision tree/Ensemble trees and use train and test data set that has all the components of seasons and other time level factors. In addition to this, we will also try to improve on the time series model by either exploring the hourly patters and forecasting for usage for a particular hours in a day. Lastly, we will consider getting more years of data which will allow us to capture the seasonal and time based patterns of usage in the model.
+The initial results of a time series forecasting model on a day level depicts that our accuracy is pretty low. It is also unable to gauge the seasonal effects in the data, e.g. the sudden drop of usage in winters. In order to improve our models we will explore different modeling techniques such as Decision tree/Ensemble trees. The models will have train and test data set that has all the components of seasons and other time level factors. In addition to this, we will also try to improve on the time series model by either exploring the hourly patterns and forecasting the usage for a particular hours in a day. Lastly, we will consider getting more years of data which will allow us to capture the seasonal and time based patterns of usage in the model. We have found more data for the DC Capital Bike Share program, but it doesn't include any weather forecasts. Therefore, depending on the functionality of the model we may or may not use that data (can find the extra data [here: capitalbikeshare-data](https://s3.amazonaws.com/capitalbikeshare-data/index.html)). This will require the pulling of additional weather data to be used along with the bike data.
 
-Additionally, as mentioned above, the two different response variables `reigstered` and `casual` exhibit significant differences and likely warrant building two separate models. Due to the correlation of our temperature variables with seasons (logically) we may needs to consider variable selection techniques to reduce the number of factors down.
+Additionally, as mentioned above, the two different response variables `registered` and `casual` exhibit significant differences and likely warrant building two separate models. Due to the correlation of our temperature variables with seasons (logically) we may needs to consider variable selection techniques to reduce the number of factors down.
 
 # Literature Review Summary
 

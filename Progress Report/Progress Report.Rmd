@@ -252,16 +252,16 @@ combined_data <- data.frame(
 
 # Create a ggplot with forecasted and actual values
 a <- ggplot(combined_data, aes(x = Date)) +
-  geom_line(aes(y = Forecasted), color = "black", linetype = "solid", show.legend = TRUE) +
-  geom_line(aes(y = Actual), color = "blue", linetype = "solid") +
-  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1, color = "blue") +
-  geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Forecasted)-10, label = "Forecasted"), vjust = 1) +
+  geom_line(aes(y = Forecasted, color = 'Forecasted'), linetype = "solid", show.legend = TRUE) +
+  geom_line(aes(y = Actual, color = 'Actual'), linetype = "solid") +
+  # geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Actual), label = "Actual"), vjust = 1, color = "blue") +
+  # geom_text(aes(x = max(combined_data$Date), y = max(combined_data$Forecasted)-10, label = "Forecasted"), vjust = 1) +
+  scale_color_manual("", values = c("black", "blue")) +
   labs(
     title = "Daily Bike-Sharing Demand Forecast",
     x = "Date",
     y = "Demand Count"
   ) +
-  scale_color_manual(values = c("black", "blue")) +
   theme_minimal()
 suppressWarnings({
   print(a)

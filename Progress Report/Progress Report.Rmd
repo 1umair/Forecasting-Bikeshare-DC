@@ -32,15 +32,11 @@ require(gridExtra)
 
 # Table of Contents
 
-I. Introduction
-
-II. Current Status of the Project
-
-III. Ongoing Work
-
-V. Literature Review Summary
-
-VI. Works Cited
+* Introduction
+* Current Status of the Project
+* Ongoing Work
+* Literature Review Summary
+* Works Cited
 
 # Introduction
 

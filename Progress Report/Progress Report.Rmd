@@ -1,14 +1,6 @@
 ---
-output:
-  html_document: default
-  pdf_document: default
----
---
 header-includes:
 - \usepackage{fancyhdr}
-- \usepackage{relsize}
-- \usepackage{algorithm}
-- \usepackage{algorithmic}
 - \pagestyle{fancy}
 - \fancypagestyle{plain}{\pagestyle{fancy}}
 - \headheight 35pt

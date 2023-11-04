@@ -21,6 +21,49 @@ levels(day$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
 levels(day$holiday) <- c('non-holiday', 'holiday')
 levels(day$weather) <- c('clear', 'misty', 'light rain', 'heavy rain')
 
+temp <- day |>
+  ggplot() +
+  geom_histogram(mapping = aes(temp, fill="Actual"), alpha = 0.5) +
+  geom_histogram(mapping = aes(atemp, fill= "Feels Like"), alpha = 0.5) +
+  scale_fill_manual("Temperature", values = c("red", "blue")) +
+  labs(
+    x = "Normalized Temperature (C)",
+    y = "Density",
+    title = "Histogram of Normalized Temperature in Celcius",
+    subtitle = "Feels and Actual Temperature",
+  )
+
+hum <- day |>
+  ggplot() +
+  geom_histogram(mapping = aes(hum)) +
+  labs(
+    x = "Normalized Humidity",
+    y = "Density",
+    title = "Histogram of Normalized Humidity"
+  )
+
+ws <- day |>
+  ggplot(mapping = aes(windspeed)) +
+  geom_histogram() +
+  labs(
+    x = "Normalized Wind Speed",
+    y = "Density",
+    title = "Histogram of Normalized Wind Speed"
+  )
+grid.arrange(hum, ws, ncol=2)
+temp
+
+day |>
+  ggplot() +
+  geom_histogram(mapping = aes(total_count, fill="Total"), alpha = 0.5) +
+  geom_histogram(mapping = aes(casual, fill="Casual"), alpha = 0.5) +
+  geom_histogram(mapping = aes(registered, fill= "Registered"), alpha = 0.5) +
+  scale_fill_manual("Rider Type", values = c("green", "red", "blue")) +
+  labs(
+    x = "Bike Usage per Day",
+    y = "Density",
+    title = "Total vs Casual vs Registered Users"
+  )
 
 # Look at daily usage of bikes on a seasonality plot
 ggplot(data = day, mapping = aes(x = instant, y = total_count)) +

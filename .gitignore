@@ -33,6 +33,9 @@ vignettes/*.pdf
 *_cache/
 /cache/
 
+# Latex build file
+*.tex
+
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md

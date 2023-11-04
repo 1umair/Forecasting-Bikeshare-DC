@@ -3,7 +3,6 @@
 \PassOptionsToPackage{hyphens}{url}
 %
 \documentclass[
-  11pt,
 ]{article}
 \usepackage{amsmath,amssymb}
 \usepackage{iftex}
@@ -38,46 +37,16 @@
 \makeatother
 \usepackage{xcolor}
 \usepackage[margin=1in]{geometry}
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -95,19 +64,6 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-\usepackage{fancyhdr}
-\usepackage{relsize}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-\pagestyle{fancy}
-\fancypagestyle{plain}{\pagestyle{fancy}}
-\headheight 35pt
-\fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir}
-\fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Progress Report}}
-\fancyhead[RE,RO]{MGT 6203 \\ Fall 2023}
-\fancyfoot[RE,RO]{\small \thepage}
-\fancyfoot[CE,CO]{}
-\headsep 1.5em
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -123,6 +79,30 @@
 
 \begin{document}
 
+\begin{longtable}[]{@{}l@{}}
+\toprule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+header-includes: \\
+- \\
+- \\
+- \\
+- \\
+- \pagestyle{fancy} \\
+- \fancypagestyle{plain}{\pagestyle{fancy}} \\
+- \headheight 35pt \\
+- \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir} \\
+-
+\fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Progress Report}} \\
+- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023} \\
+- \fancyfoot[RE,RO]{\small \thepage} \\
+- \fancyfoot[CE,CO]{} \\
+- \headsep 1.5em \\
+output: pdf\_document \\
+fontsize: 11pt \\
+\end{longtable}
+
 \hypertarget{forecasting-bikesharing-usage-for-dcs-capital-bikshare-system}{%
 \section{Forecasting Bikesharing Usage for DC's Capital Bikshare
 System}\label{forecasting-bikesharing-usage-for-dcs-capital-bikshare-system}}
@@ -130,22 +110,15 @@ System}\label{forecasting-bikesharing-usage-for-dcs-capital-bikshare-system}}
 \hypertarget{table-of-contents}{%
 \section{Table of Contents}\label{table-of-contents}}
 
-I. Introduction 1. Brief Overview of the Project
+I. Introduction
 
 \begin{enumerate}
 \def\labelenumi{\Roman{enumi}.}
 \setcounter{enumi}{1}
 \item
-  Current Status of the Project A. Data Cleaning and Preprocessing B.
-  Exploratory Data Analysis/Visualizations C. Key Findings/Adjustments
-  D. Challenges Encountered
+  Current Status of the Project
 \item
-  Ongoing Work A. Intermediate Data Preparation B. Preliminary Modeling
-  C. Expected Milestones and Deliverables
-\item
-  Explanation and Background Information A. Provide Background on the
-  Statistical Models Used B. Explain the Methodology and Approach C.
-  Justify the Selection of Models and Techniques
+  Ongoing Work
 \end{enumerate}
 
 V. Literature Review Summary
@@ -189,13 +162,26 @@ The dataset has required minimal cleaning. We had to convert several
 variables into factor variables (season, holiday, weekday, workingday,
 weather). Additionally we noted that the data key for our dataset
 mislabeled the season factor variable, which was trivial to correct.
+Fortunately, there was no missing data.
 
 \hypertarget{eda-visualization}{%
 \subsection{EDA / Visualization}\label{eda-visualization}}
 
+\begin{center}\includegraphics[width=0.33\linewidth]{Progress-Report_files/figure-latex/hist-1} \end{center}
+
+\begin{center}\includegraphics[width=0.33\linewidth]{Progress-Report_files/figure-latex/hist-2} \end{center}
+
+\begin{center}\includegraphics[width=0.33\linewidth]{Progress-Report_files/figure-latex/hist-3} \end{center}
+
+\begin{center}\includegraphics[width=0.33\linewidth]{Progress-Report_files/figure-latex/hist-4} \end{center}
+
 Not all of our predictors or response variables are distributed
 normally. In particular, humidity exhibits leftward skew, and windspeed
 exhibits rightward skew.
+
+\begin{center}\includegraphics[width=0.75\linewidth]{Progress-Report_files/figure-latex/usage_hist-1} \end{center}
+
+\begin{center}\includegraphics[width=0.75\linewidth]{Progress-Report_files/figure-latex/usage_hist-2} \end{center}
 
 Casual users exhibit rightward skew, while registered users are not too
 far from the normal distribution.
@@ -225,13 +211,6 @@ our bikes every day.
 Next, let's verify these findings by conducting an ANOVA and pairwise
 analysis.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{model }\OtherTok{=} \FunctionTok{aov}\NormalTok{(df\_h}\SpecialCharTok{$}\NormalTok{total\_count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ df\_h}\SpecialCharTok{$}\NormalTok{season, }\AttributeTok{data =}\NormalTok{ df\_h)}
-\FunctionTok{summary}\NormalTok{(model)}
-\end{Highlighting}
-\end{Shaded}
-
 \begin{verbatim}
 ##                Df    Sum Sq  Mean Sq F value Pr(>F)    
 ## df_h$season     3  37729358 12576453   409.2 <2e-16 ***
@@ -245,12 +224,6 @@ statistically significant.At least one group mean is different from the
 rest.
 
 Next, we compare the means of each pair of seasons.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{TukeyHSD}\NormalTok{(model)}
-\end{Highlighting}
-\end{Shaded}
 
 \begin{verbatim}
 ##   Tukey multiple comparisons of means
@@ -286,13 +259,28 @@ throughout the week. This indicates that we might need to look at
 different models depending on the user type. We might see a little more
 non-linearity with casual users than with the registered users.
 
+\hypertarget{preliminary-time-series-forecasting}{%
+\subsection{Preliminary Time Series
+Forecasting}\label{preliminary-time-series-forecasting}}
+
+We have started with a simple time series forecasting model using the
+day wise usage data. We have used ARIMA to forecast for on the last 51
+days of the year. We understand from the data analysis that we have
+conducted above that seasonal effects do have an effect on the usage.
+
+\begin{verbatim}
+##                 ME     RMSE     MAE       MPE     MAPE
+## Test set -915.7404 1846.462 1295.75 -70.53495 76.82173
+\end{verbatim}
+
+\begin{center}\includegraphics{Progress-Report_files/figure-latex/Premilinary Time series forecasting day wise-1} \end{center}
+
 \hypertarget{ongoing-work}{%
 \section{Ongoing Work}\label{ongoing-work}}
 
 Anticipated challenges:
 
 \begin{itemize}
-\tightlist
 \item
   Distinguishing between the influences of weather and the influence of
   the season, particularly on casual usage. DC has many visitors in
@@ -306,9 +294,27 @@ Anticipated challenges:
   systems.
 \end{itemize}
 
-\hypertarget{explanation-and-background-information}{%
-\section{Explanation and Background
-Information}\label{explanation-and-background-information}}
+\hypertarget{future-modeling}{%
+\subsection{Future Modeling}\label{future-modeling}}
+
+The initial results of a time series forecasting model on a day level
+depicts that our accuracy is pretty low and especially it is unable to
+gauge the seasonal effects in the data especially the sudden drop of
+usage in winters. In order to improve our models we will now explore
+different modeling techniques such as Decision tree/Ensemble trees and
+use train and test data set that has all the components of seasons and
+other time level factors. In addition to this, we will also try to
+improve on the time series model by either exploring the hourly patters
+and forecasting for usage for a particular hours in a day. Lastly, we
+will consider getting more years of data which will allow us to capture
+the seasonal and time based patterns of usage in the model.
+
+Additionally, as mentioned above, the two different response variables
+\texttt{reigstered} and \texttt{casual} exhibit significant differences
+and likely warrant building two separate models. Due to the correlation
+of our temperature variables with seasons (logically) we may needs to
+consider variable selection techniques to reduce the number of factors
+down.
 
 \hypertarget{literature-review-summary}{%
 \section{Literature Review Summary}\label{literature-review-summary}}

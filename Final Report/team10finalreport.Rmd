@@ -1,0 +1,45 @@
+---
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+- \headheight 35pt
+- \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir \\}
+- \fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Final Report} \\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}
+- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023 \\}
+- \fancyfoot[RE,RO]{\small \thepage}
+- \fancyfoot[CE,CO]{}
+- \headsep 1.5em
+output: pdf_document
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+require(gridExtra)
+library(kableExtra)
+library(broom)
+```
+# Forecasting Bikesharing Usage for DC's Capital Bikshare System
+
+# Table of Contents
+
+* Introduction
+* Current Status of the Project
+* Ongoing Work
+* Literature Review Summary
+* Works Cited
+
+# Introduction
+
+
+
+# Works Cited
+
+Bean, R., Pojani, D., & Corcoran, J. (2021). How does weather affect bikeshare use? A comparative analysis of forty cities across climate zones. _Journal of Transport Geography_, 95. https://doi.org/10.1016/j.jtrangeo.2021.103155.
+
+Eren, E., & Uz, V. E. (2020). A review on bike-sharing: The factors affecting bike-sharing demand. _Sustainable Cities and Society_, 54. https://doi.org/10.1016/j.scs.2019.101882
+
+Ashgar, H. I., Elhenawy, M., & Rakha, H. A. (2019). Modeling bike counts in a bike-sharing system considering the effect of weather conditions. _Case Studies on Transport Policy_, 7(2), 261-268. https://doi.org/10.1016/j.cstp.2019.02.011

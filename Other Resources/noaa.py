@@ -2,6 +2,7 @@ import requests
 from datetime import date, timedelta
 import pandas as pd
 
+
 #1) find station_id in washington DC
 #FIPS is 11 for District of Columbia
 Token = 'TRecfmahiXwlNkfvBntIPYCQonUwNWMQ'
@@ -19,12 +20,11 @@ def get_noaa_data(station_id, start_date, end_date, token):
     # station_id = 'GHCND:USW00093738'
     # start_date = date(2020,1,1)
     # end_date = date(2020, 1,2)
-    # returns a pandas dataframe with date, Average temperature (tenths of degrees C), Precipitation (tenths of mm),  and
+    # returns a pandas dataframe with date, max temperature (tenths of degrees C), Precipitation (tenths of mm),  and
     delta = timedelta(days=1)
     weather_data = pd.DataFrame()
     while start_date <= end_date:
         start = start_date.strftime("%Y-%m-%d")
-        end = end_date.strftime("%Y-%m-%d")
         start_date += delta
         url = f"http://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&stationid={station_id}&startdate={start}&enddate={start}"
         headers = {"token":Token}
@@ -35,6 +35,5 @@ def get_noaa_data(station_id, start_date, end_date, token):
         new_data = data[['date', 'datatype', 'value']].pivot(index='date', columns='datatype')
         new_data = new_data['value']
         new_data.columns.name = None
-        weather_data = pd.concat([weather_data,new_data[['TAVG', 'PRCP','AWND']]])
+        weather_data = pd.concat([weather_data,new_data[['TMAX', 'PRCP','AWND']]])
     return weather_data
-

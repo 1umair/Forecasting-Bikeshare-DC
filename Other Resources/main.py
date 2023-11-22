@@ -10,5 +10,5 @@ station_id = 'GHCND:USW00093738'
 Token = 'TRecfmahiXwlNkfvBntIPYCQonUwNWMQ'
 start_date = date(2013,1,1)
 end_date = date(2013,12 ,31)
-historical_weather_data = noaa.get_noaa(station_id, start_date, end_date, Token)
+historical_weather_data = noaa.get_noaa_data(station_id, start_date, end_date, Token)
 historical_weather_data

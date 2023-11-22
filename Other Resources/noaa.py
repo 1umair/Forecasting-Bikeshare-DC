@@ -20,7 +20,7 @@ def get_noaa_data(station_id, start_date, end_date, Token):
     # station_id = 'GHCND:USW00093738'
     # start_date = date(2020,1,1)
     # end_date = date(2020, 1,2)
-    # returns a pandas dataframe with date, max temperature (tenths of degrees C), Precipitation (tenths of mm),  and
+    # returns a pandas dataframe with date, max temperature (tenths of degrees C), Precipitation (tenths of mm),  and Average daily wind speed (tenths of meters per second)
     delta = timedelta(days=1)
     weather_data = pd.DataFrame()
     retry_limit = 10

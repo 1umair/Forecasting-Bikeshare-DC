@@ -4,7 +4,13 @@ library(ggplot2)
 # What days is demand low? 
 # Can we specifically target those days to perform repairs?
 
-# fp <- file.path('./', 'Data', 'day.csv')
+#################################################
+# Timeseries model are pretty much useless.
+# There isn't enough data to be able to come
+# to any true conclusion. 
+# All the other models aren't of any true help
+# either. The majority have low R^2 values.
+#################################################
 
 day <- read_csv("./Data/day.csv") |>
   rename(

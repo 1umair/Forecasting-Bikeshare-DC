@@ -148,3 +148,105 @@ sse <- sum((y_pred - y)^2)
 rsq <- 1 - sse / sst
 rsq
 
+# ARIMA --------------
+arima(day$total_count, order = c(1, 0, 0))
+arima(day$total_count, order = c(1, 1, 0))
+arima(day$total_count, order = c(1, 0, 1))
+arima(day$total_count, order = c(2, 1, 3))
+arima(day$total_count, order = c(1, 0, 0))
+
+
+# TS -----------------
+library(fpp2)
+
+Y <- ts(day$casual, start = c(2011, 1), frequency = 365)
+
+autoplot(Y) + 
+  ggtitle("Time Plot: Bikeshare usage")
+
+# Remove the trend
+DY <- diff(Y)
+
+autoplot(DY) +
+  ggtitle("Time Plot: Change in bikeshare usage")
+
+# Seasonality in Data?
+# Series appears trend-stationary, use to investigate seasonality
+ggseasonplot(DY) +
+  ggtitle("Seasonal Plot: Change in Daily Bikeshare usage")
+###########################################
+# There is no apparent seasonal data for `total_count`
+# There is no apparent seasonal data for `registered`
+# There is no apparent seasonal data for `casual`
+###########################################
+
+# Another seasonal plot
+ggsubseriesplot(DY)
+
+###########################################
+# Our series for total_count has trend
+# but doesn't have seasonality.
+# To remove the trend, we take first
+# difference. 
+# The first differenced series doesn't
+# have seasonality.
+#
+# Forecast with various methods
+###########################################
+
+######
+# Use benchmark method to forecast
+######
+fit <- snaive(DY)
+summary(fit)
+checkresiduals(fit)
+
+# Residual SDs:
+# total_count: 1530.1224
+# registered: 1245.3586
+# casual: 827.6434
+
+###########################
+# Fit ETS method
+###########################
+fit_ets <- ets(Y)
+summary(fit_ets)
+checkresiduals(fit_ets)
+# fit_stlf <- stlf(Y)
+# summary(fit_stlf)
+# checkresiduals(fit_stlf)
+
+# Residual SDs:
+# total_count: 0.2268 ETS(M, A, N)
+# registered: 526.4095
+# casual: 346.8763 STL + ETS(A, N, N)
+
+###########################
+# Fit ARIMA model
+###########################
+# d=1 means to take the first difference or trend out of it
+# approximation = FALSE
+fit_arima <- auto.arima(Y, d=1, stepwise = FALSE, trace = TRUE)
+summary(fit_arima)
+checkresiduals(fit_arima)
+
+# Residual SDs:
+# total_count: 1259.526
+# registered: 1027.78 ARIMA(0,1,2)(0,1,0)[365] 
+# casual: 628.0342 ARIMA(4,1,1)(0,1,0)[365]
+
+##########################
+# Forecast with ARIMA model
+##########################
+
+fcst <- forecast(fit_arima, h=365)
+autoplot(fcst)
+
+
+
+
+
+
+
+
+

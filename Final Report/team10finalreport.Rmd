@@ -30,13 +30,19 @@ library(broom)
 * Overview of Project
 * Overview of Data
 * Overview of Modeling
+* Conclusion
 * Works Cited
 
 # Introduction
+Background information and problem framing
 
 # Overview of Project
+General approach and initial hypotheses
 
 # Overview of Data
+Data Cleaning Process
+Key Variables and Exploratory Data Analysis
+Data Source
 
 ## Additional Scraping, Cleaning
 
@@ -56,7 +62,13 @@ daily windspeed.
 ## Key Predictors
 
 # Overview of Modeling
+Model Types and Comparison
+Model Selection and Optimization
+Model Performance
+Detailed evaluation and interpretation of results
 
+#Conclusion
+Overall conclusion and key learnings
 
 # Works Cited
 

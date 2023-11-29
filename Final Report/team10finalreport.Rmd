@@ -27,13 +27,35 @@ library(broom)
 # Table of Contents
 
 * Introduction
-* Current Status of the Project
-* Ongoing Work
-* Literature Review Summary
+* Overview of Project
+* Overview of Data
+* Overview of Modeling
 * Works Cited
 
 # Introduction
 
+# Overview of Project
+
+# Overview of Data
+
+## Additional Scraping, Cleaning
+
+Initial EDA on the dataset we began with indicated we did not have sufficient
+data to fit any models that could improve upon linear regression. So, we scraped
+and combined two different datasets:
+* Capital Bikeshare usage data from 01-01-2013 through 12-31-2017, from
+Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
+* Weather data for DC for the same time period, from NOAA
+
+The Bikeshare data only counted trips taken, and did not distinguish between
+registered or casual users.
+
+The Weather data included the day's high temperature, precipitation, and average
+daily windspeed.
+
+## Key Predictors
+
+# Overview of Modeling
 
 
 # Works Cited

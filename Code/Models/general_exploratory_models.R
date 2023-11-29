@@ -33,7 +33,9 @@ levels(day$weather) <- c('clear', 'misty', 'light rain', 'heavy rain')
 head(day)
 
 day_cnt <- day |>
-  select(season:windspeed, total_count)
+  select(season:windspeed, total_count, -yr, -mnth)
+
+
 
 # Poor Linear Regression -----------------
 day_cnt <- day |>

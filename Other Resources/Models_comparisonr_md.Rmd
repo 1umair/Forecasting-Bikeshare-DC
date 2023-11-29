@@ -1,0 +1,118 @@
+---
+title: "RF_LM_Lightgbm"
+output: html_document
+date: "2023-11-29"
+---
+
+```{r Data loaded}
+final_df2 <- read.csv("final_df.csv")
+```
+
+## Models COmparison
+
+You can also embed plots, for example:
+
+```{r Model code, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(randomForest)
+library(xgboost)
+
+final_data <- final_df2
+summary(final_df2)
+set.seed(123)
+trainIndex <- createDataPartition(final_data$cnt, p = 0.8, 
+                                  list = FALSE, 
+                                  times = 1)
+train_data <- final_data[trainIndex, ]
+test_data  <- final_data[-trainIndex, ]
+
+
+# Linear Regression
+lm_model <- lm(cnt ~ season + AWND + day_of_week + mnth_date + TMAX
+               + PRCP, data = train_data)
+
+# Linear Regression
+lm_pred <- predict(lm_model, newdata = test_data)
+lm_rmse <- sqrt(mean((lm_pred - test_data$cnt)^2))
+
+
+# Random Forest
+rf_model <- randomForest(cnt ~ season + AWND + day_of_week + mnth_date + TMAX
+                         + PRCP, data = train_data, ntree = 500)
+
+# Random Forest
+rf_pred <- predict(rf_model, newdata = test_data)
+rf_rmse <- sqrt(mean((rf_pred - test_data$cnt)^2))
+
+#LightGBM
+
+library(lightgbm)
+
+# Assuming your data is in a data frame called 'final_data'
+train_data$season <- as.factor(train_data$season)
+train_data$mnth_date <- as.factor(train_data$mnth_date)
+train_data$day <- as.factor(train_data$day)
+train_data$TMAX <- as.numeric(train_data$TMAX)
+train_data$PRCP <- as.numeric(train_data$PRCP)
+train_data$AWND <- as.numeric(train_data$AWND)
+library(data.table)
+setDT(train_data)
+setDT(test_data)
+train_dataset <- lgb.Dataset(data = as.matrix(train_data[, -c("cnt","dteday")]),
+                             label = train_data$cnt,
+                             categorical_feature = c("season", "mnth_date", "day",
+                                                     "day_of_week"
+                                                     ))
+
+test_dataset <- lgb.Dataset(data = as.matrix(test_data[, -c("cnt","dteday")]),
+                            label = test_data$cnt,
+                            categorical_feature = c("season", "mnth_date", "day",
+                                                    "day_of_week"
+                            ))
+
+# Specify LightGBM parameters
+params <- list(objective = "regression",
+               metric = "rmse",
+               boosting_type = "gbdt")
+
+# Train the LightGBM model
+lgb_model <- lgb.train(params = params,
+                       data = train_dataset,
+                       nrounds = 100,
+                       valids = list(test = test_dataset))
+
+lgb_pred <- predict(lgb_model, as.matrix(test_data[, -c("cnt","dteday")]))
+lgb_pred <- predict(lgb_model, as.matrix(test_data[, -c("cnt","dteday")]))
+lgb_rmse <- sqrt(mean((lgb_pred - test_data$cnt)^2))
+
+cat("LightGBM RMSE:", lgb_rmse, "\n")
+
+
+results <- data.frame(Model = c("Linear Regression", "Random Forest", "Lightgbm"),
+                      RMSE = c(lm_rmse, rf_rmse, lgb_rmse))
+
+print(results)
+
+library(ggplot2)
+
+# Plotting true values vs predicted values for each model
+plot_data_lm <- data.frame(Actual = test_data$cnt, Predicted = lm_pred, Model = "Linear Regression")
+plot_data_rf <- data.frame(Actual = test_data$cnt, Predicted = rf_pred, Model = "Random Forest")
+plot_data_lgb <- data.frame(Actual = test_data$cnt, Predicted = lgb_pred, Model = "LightGBM")
+
+plot_data <- rbind(plot_data_lm, plot_data_rf, plot_data_lgb)
+
+ggplot(plot_data, aes(x = Actual, y = Predicted, color = Model)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(title = "True Values vs Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values",
+       color = "Model") +
+  theme_minimal()
+
+
+```
+

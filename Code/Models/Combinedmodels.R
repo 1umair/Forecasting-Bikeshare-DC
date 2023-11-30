@@ -1,0 +1,307 @@
+library(tidyverse)
+library(ggplot2)
+library(fpp2)
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(randomForest)
+library(xgboost)
+library(data.table)
+# Data ----------------------------------
+rm(list=ls())
+fp <- file.path(getwd(), 
+                'bikeshare_usage_weather_by_date.csv')
+#read_csv(fp)
+df <- read_csv(fp) |>
+  select(Date, Count, TMAX, PRCP, AWND)
+
+# Break it down from daily to weekly to see and trends and seasons better.
+weekly_average <- df |>
+  mutate(week = as.Date(cut(Date, "week"))) |>
+  group_by(week) |>
+  summarize(count = mean(Count))
+
+
+# Set up TS data -------------------------
+
+index_cutoff = nrow(as.data.table(weekly_average)[week < '2017-01-01'])
+
+Y <- ts(weekly_average$count, start = c(2012, 12), frequency = 52)
+#Y <- ts(df$Count, start = c(2012, 12), frequency = 365)
+
+# #split_index <- floor(0.8 * nrow(df))
+# train_indices <- seq_len(split_index)
+# test_indices <- seq(split_index + 1, nrow(df))
+# 
+# train_Y <- Y[train_indices]
+# test_Y  <- Y[test_indices]
+
+
+train_Y <- subset(Y, end = index_cutoff)
+test_Y <- subset(Y, start = index_cutoff)
+
+autoplot(train_Y) +
+  ggtitle("TIme Plot: Bikshare usage")
+
+# Remove the trend
+DY <- diff(train_Y)
+
+autoplot(DY) + 
+  ggtitle("Time Plot: bikeshare usage without trend")
+
+# Is there Seasonality?
+ggseasonplot(DY) +
+  ggtitle("Seasonal Plot: Change in Daily Bikeshare usage")
+
+# It is very hard to see if there is any seasonality. 
+
+# Use benchmark method to forecast ------------------
+fit <- snaive(DY)
+summary(fit)
+checkresiduals(fit)
+# Residual sd: 1791.0014 for weekly
+
+
+# Fit ETS method ------------------
+# This one fails due to seasonality and too many points.
+fit_ets <- ets(train_Y)
+summary(fit_ets)
+checkresiduals(fit_ets)
+# sigma:  1384.018    ETS(A,Ad,N) 
+
+
+# Fit ARIMA model ------------------
+fit_arima <- auto.arima(train_Y, d=1, stepwise = FALSE, trace = TRUE)
+summary(fit_arima)
+checkresiduals(fit_arima)
+# sigma: 1300.662     ARIMA(0,1,3)(0,1,1)[52]
+
+
+# Forecast with ARIMA model -------------------------
+# The best model is ARIMA (comparing sigma), therefore let's use it to forecast.
+fcst <- forecast(fit_arima, h=52)
+#fcst <- forecast(fit_arima, h=365)
+
+
+# Plot the Forecast vs Actual -------------------------
+autoplot(train_Y) +
+  autolayer(fcst, series = 'Forecast', alpha = 0.5) +
+  autolayer(test_Y, series = 'Actual') +
+  labs(
+    title = "Forecast vs Actual",
+    subtitle = "Bikeshare usage on weekly basis",
+    x = 'Time in Weeks',
+    y = 'Average Bike usage',
+    caption = fcst$method
+  )
+
+# RMSE for ARIMA -------------------------
+arima.rmse <- sqrt(mean((fcst$mean - test_Y)^2))
+arima.rmse
+# 1519.725
+
+# Holt-Winters ---------------------
+# We are still using the above Y, train_Y and test_Y
+
+# By looking at the decomposed data, we can see that there is an obvious
+# trend and seasonality. This decomposition does a better job at displaying
+# the seasonality than the above plots in `Set up TS data`
+decompose(Y) |>
+  plot()
+
+hw.fit <- HoltWinters(train_Y)
+
+# Forecast out 52 weeks
+hw.fcst <- forecast(hw.fit, h = 52)
+
+autoplot(train_Y) +
+  autolayer(hw.fcst, series = 'Forecast', alpha=0.5) +
+  autolayer(test_Y, series = 'Actual') +
+  labs(
+    title = "Forecast vs Actual",
+    subtitle = "Bikeshare usage on weekly basis",
+    x = 'Time in Weeks',
+    y = 'Average Bike usage',
+    caption = "Holt-Winters"
+  )
+
+hw.rmse <- sqrt(mean((hw.fcst$mean - test_Y)^2))
+hw.rmse
+# 1622.855
+
+
+# Linear Regression of TS -----------------
+lm.fit <- tslm(train_Y ~ trend + season)
+
+# Forecast out 52 weeks
+lm.fcst <- forecast(lm.fit, h = 52)
+
+autoplot(train_Y) +
+  autolayer(lm.fcst, series = 'Forecast', alpha=0.5) +
+  autolayer(test_Y, series = 'Actual')
+
+lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
+lm.rmse
+# 1479.862
+
+#------------------- Other models ------------##
+
+#arima.rmse , lm.rmse, hw.rmse
+
+final_data <- df
+summary(final_data)
+
+final_data[,day_of_week := weekdays(Date)]
+final_data[,mnth := month(Date)]
+final_data[,day := as.numeric(format(Date, "%d"))]
+final_data[,mnth_date := paste0(day,"_",mnth)]
+final_data[,year := year(Date)]
+
+set.seed(123)
+# trainIndex <- createDataPartition(final_data$cnt, p = 0.8, 
+#                                   list = FALSE, 
+#                                   times = 1)
+#Segregated Seasons into each categories
+final_data[,season := ifelse(
+  (mnth == 3 & day >=21) | (mnth >= 4 & mnth <= 5) | (mnth == 6 & day <= 20),"2",
+  ifelse(
+    (mnth == 6 & day >=21) | (mnth >= 7 & mnth <= 8) | (mnth == 9 & day <= 22),"3",
+    ifelse(
+      (mnth == 9 & day >=23) | (mnth >= 10 & mnth <= 11) | (mnth == 12 & day <= 20),"4","1"
+    )
+  ))]
+
+setDT(final_data)
+train_data <- final_data[Date < '2017-01-01']
+test_data  <- final_data[Date >= '2017-01-01']
+
+
+
+# Linear Regression
+lm_model <- lm(Count ~ season + AWND + day_of_week + mnth_date + TMAX + year
+               + PRCP, data = train_data)
+
+# Linear Regression
+lm_pred <- predict(lm_model, newdata = test_data)
+lm_rmse <- sqrt(mean((lm_pred - test_data$Count)^2))
+
+test_data$Count
+
+
+# Sample data frame
+# Replace this with your actual data frame
+df12 <- data.frame(
+  Date = test_data$Date,
+  Actual = test_data$Count,
+  Predited = lm_pred
+)
+
+# Plotting using ggplot2
+ggplot(df12, aes(x = Date)) +
+  geom_line(aes(y = Actual, color = "Actual"), size = 1) +
+  geom_line(aes(y = Predited, color = "Predited"), size = 1) +
+  labs(title = "Acutal vs predicted - Linear Regression",
+       x = "Date",
+       y = "Values") +
+  scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
+  theme_minimal()
+
+
+
+
+# Random Forest
+rf_model <- randomForest(Count ~ season + AWND + day_of_week + mnth_date + TMAX
+                         + PRCP + year, data = train_data, ntree = 500)
+
+# Random Forest
+rf_pred <- predict(rf_model, newdata = test_data)
+rf_rmse <- sqrt(mean((rf_pred - test_data$Count)^2))
+
+df12 <- data.frame(
+  Date = test_data$Date,
+  Actual = test_data$Count,
+  Predited = rf_pred
+)
+
+
+# Plotting using ggplot2
+ggplot(df12, aes(x = Date)) +
+  geom_line(aes(y = Actual, color = "Actual"), size = 1) +
+  geom_line(aes(y = Predited, color = "Predited"), size = 1) +
+  labs(title = "Acutal vs predicted - Random Forest",
+       x = "Date",
+       y = "Values") +
+  scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
+  theme_minimal()
+
+
+#----- Light GBM ----------------#
+
+
+#LightGBM
+
+library(lightgbm)
+
+# Assuming your data is in a data frame called 'final_data'
+train_data$season <- as.factor(train_data$season)
+train_data$mnth_date <- as.factor(train_data$mnth_date)
+train_data$day <- as.factor(train_data$day)
+train_data$TMAX <- as.numeric(train_data$TMAX)
+train_data$PRCP <- as.numeric(train_data$PRCP)
+train_data$AWND <- as.numeric(train_data$AWND)
+
+train_dataset <- lgb.Dataset(data = as.matrix(train_data[, -c("Count","Date")]),
+                             label = train_data$Count,
+                             categorical_feature = c("season", "mnth_date", "day",
+                                                     "day_of_week"
+                             ))
+
+test_dataset <- lgb.Dataset(data = as.matrix(test_data[, -c("Count","Date")]),
+                            label = test_data$Count,
+                            categorical_feature = c("season", "mnth_date", "day",
+                                                    "day_of_week"
+                            ))
+
+# Specify LightGBM parameters
+params <- list(objective = "regression",
+               metric = "rmse",
+               boosting_type = "gbdt")
+
+# Train the LightGBM model
+lgb_model <- lgb.train(params = params,
+                       data = train_dataset,
+                       nrounds = 100,
+                       valids = list(test = test_dataset))
+
+lgb_pred <- predict(lgb_model, as.matrix(test_data[, -c("Count","Date")]))
+lgb_pred <- predict(lgb_model, as.matrix(test_data[, -c("Count","Date")]))
+lgb_rmse <- sqrt(mean((lgb_pred - test_data$Count)^2))
+
+cat("LightGBM RMSE:", lgb_rmse, "\n")
+
+df12 <- data.frame(
+  Date = test_data$Date,
+  Actual = test_data$Count,
+  Predited = lgb_pred
+)
+
+
+# Plotting using ggplot2
+ggplot(df12, aes(x = Date)) +
+  geom_line(aes(y = Actual, color = "Actual"), size = 1) +
+  geom_line(aes(y = Predited, color = "Predited"), size = 1) +
+  labs(title = "Acutal vs predicted - Random Forest",
+       x = "Date",
+       y = "Values") +
+  scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
+  theme_minimal()
+
+
+#--------------------- Results ---------------------------------------------#
+
+results <- data.frame(Model = c("Linear Regression", "Random Forest", "Lightgbm","Arima RMSE"),
+                      RMSE = c(lm_rmse, rf_rmse, lgb_rmse,arima.rmse))
+
+print(results)
+
+

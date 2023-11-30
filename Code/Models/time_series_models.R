@@ -109,3 +109,19 @@ hw.rmse <- sqrt(mean((hw.fcst$mean - test_Y)^2))
 hw.rmse
 # 1622.855
 
+
+# Linear Regression of TS -----------------
+lm.fit <- tslm(train_Y ~ trend + season)
+
+# Forecast out 52 weeks
+lm.fcst <- forecast(lm.fit, h = 52)
+
+autoplot(train_Y) +
+  autolayer(lm.fcst, series = 'Forecast', alpha=0.5) +
+  autolayer(test_Y, series = 'Actual')
+
+lm.rmse <- sqrt(mean((flm$mean - test_Y)^2))
+lm.rmse
+# 1479.862
+
+

@@ -40,15 +40,47 @@ Background information and problem framing
 General approach and initial hypotheses
 
 # Overview of Data
-Data Cleaning Process
-Key Variables and Exploratory Data Analysis
-Data Source
+
+## Initial Data Set:
+
+We started by just looking at two years of Capital Bikeshare usage from this dataset:
+https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset 
+
+The dataset contains 2011 and 2012 historical usage data from Washington, DC’s public 
+Capital Bikeshare program, one of the first large scale 
+bikeshare programs in the nation. Usage data is broken out by day and by hour.
+Additional data included a variety of information on weather, season, and whether
+a day was a holiday:
+
+    - holiday : whether day is holiday or not (extracted from http://dchr.dc.gov/page/holiday-schedule)
+    - weekday : day of the week
+    - workingday : if day is neither weekend nor holiday is 1, otherwise is 0.
+    + weathersit :
+   	 - 1: Clear, Few clouds, Partly cloudy, Partly cloudy
+   	 - 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
+   	 - 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
+   	 - 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
+    - temp : Normalized temperature in Celsius. The values are divided to 41 (max)
+    - atemp: Normalized feeling temperature in Celsius. The values are divided to 50 (max)
+    - hum: Normalized humidity. The values are divided to 100 (max)
+    - windspeed: Normalized wind speed. The values are divided to 67 (max)
+    - casual: count of casual users
+    - registered: count of registered users
+    - cnt: count of total rental bikes including both casual and registered
+
+## Data Cleaning Process
+
+## Key Variables and Exploratory Data Analysis
+
+
 
 ## Additional Scraping, Cleaning
 
 Initial EDA on the dataset we began with indicated we did not have sufficient
 data to fit any models that could improve upon linear regression. So, we scraped
-and combined two different datasets:
+and combined two different datasets. We used python scripts located in the
+Other Resources directory to do this.
+
 * Capital Bikeshare usage data from 01-01-2013 through 12-31-2017, from
 Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
 * Weather data for DC for the same time period, from NOAA

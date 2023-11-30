@@ -29,7 +29,6 @@ def get_noaa_data(station_id, start_date, end_date, Token):
         try:
             start = start_date.strftime("%Y-%m-%d")
             print(start)
-            start_date += delta
             url = f"http://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&stationid={station_id}&startdate={start}&enddate={start}"
             headers = {"token":Token}
             r = requests.get(url, "dataset", headers=headers)
@@ -40,6 +39,7 @@ def get_noaa_data(station_id, start_date, end_date, Token):
             new_data = new_data['value']
             new_data.columns.name = None
             weather_data = pd.concat([weather_data,new_data[['TMAX', 'PRCP','AWND']]])
+            start_date += delta
             retries = 0
         except Exception as e:
             retries += 1

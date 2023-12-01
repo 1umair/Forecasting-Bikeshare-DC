@@ -24,10 +24,8 @@ The different models used: - Decision Trees - Random Forest - LightGBM - Linear 
 
 ### Time Series Models
 
-![](../Visualizations/arima.png)
-
 <p align="center">
-  <img src="../Visualizations/arima.png" width="300"/>
+  <img src="../Visualizations/arima.png" width=500"/>
 </p>
 
 All the time series models were built and tested in `time_series_models.R` as well as the folders `Prophet attempt` and `SARIMA attemp`. The best model was added to `Combinedmodels`, which was `ARIMA`. The models were also run using weekly data. Weekly was determined by taking the mean of the week of data. This allows for cleaner plots and helps to smooth over possible outliers.

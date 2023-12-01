@@ -5,12 +5,11 @@ header-includes:
 - \fancypagestyle{plain}{\pagestyle{fancy}}
 - \headheight 35pt
 - \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir \\}
-- \fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Final Report} \\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}
-- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023 \\}
-- \fancyfoot[RE,RO]{\small \thepage}
-- \fancyfoot[CE,CO]{}
-- \headsep 1.5em
-output: pdf_document
+- "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
+  - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
+output:
+  html_document:
+    df_print: paged
 fontsize: 11pt
 ---
 
@@ -84,11 +83,11 @@ Initial EDA on the dataset we began with indicated we did not have sufficient
 data to fit any models that could improve upon linear regression. So, we scraped
 and combined two different datasets. We used python scripts located in the
 Other Resources directory to do this. Specifically, we ran get_bikeshare_data.py to get bikeshare data,
-then we ran join_data.py (which imports from noaa.py) to join the data with weather data from NOAA.
+then we ran join_data.py (which imports from noaa.py) to join the data with weather data from the NOAA API. We used the same process to add the additional weather columns to the 2011 and 2012 as well.
 
 * Capital Bikeshare usage data from 01-01-2013 through 12-31-2017, from
 Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
-* Weather data for DC for the same time period, from NOAA
+* Weather data for DC for the same time period, from NOAA (https://www.ncdc.noaa.gov/cdo-web/webservices/v2)
 
 The Bikeshare data only counted trips taken, and did not distinguish between
 registered or casual users.
@@ -121,7 +120,7 @@ final_df %>% ggplot() + geom_histogram(mapping = aes(TMAX, fill="TMAX"), alpha =
   )
 ```
 
-```{r temp_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
+```{r precp_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
 
 final_df %>% ggplot() + geom_histogram(mapping = aes(PRCP, fill="PRCP"), bins = 100, alpha = 1) +
     labs(
@@ -163,7 +162,7 @@ highest in the summer, with spring and fall in between.
 
 Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
 
-```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
+```{r weekday_usage2, echo=F, out.width="75%", fig.align="center"}
 final_df %>% mutate(season = as_factor(season)) %>%  
   mutate(day_of_week = as_factor(day_of_week)) %>%
   ggplot(mapping = aes(dteday, cnt, color = season)) +

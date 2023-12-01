@@ -76,9 +76,7 @@ a day was a holiday:
 
 ## Data Cleaning Process
 
-## Key Variables and Exploratory Data Analysis
-
-
+The dataset had required minimal cleaning. We had to convert several variables into factor variables (`season`, `holiday`, `weekday`, `workingday`, `weather`). Additionally we noted that the key for our dataset mislabeled the season variable, which was trivial to correct. Fortunately, there was no missing data.
 
 ## Additional Scraping, Cleaning
 
@@ -96,6 +94,21 @@ registered or casual users.
 
 The Weather data included the day's high temperature, precipitation, and average
 daily windspeed.
+
+## Exploratory Data Analysis
+
+```{r usage_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
+library(tidyverse)
+library(ggplot2)
+final_df <- read_csv('../Other Resources/final_df.csv')
+final_df %>% ggplot() + geom_histogram(mapping = aes(cnt, fill="Total"), alpha = 1) +
+    labs(
+    x = "Bike Usage per Day",
+    y = "Density",
+    title = "Bikeshare Usage Per Day"
+  )
+```
+
 
 ## Key Predictors
 

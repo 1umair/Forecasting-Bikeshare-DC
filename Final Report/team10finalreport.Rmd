@@ -92,9 +92,12 @@ Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
 The Bikeshare data only counted trips taken, and did not distinguish between
 registered or casual users.
 
-The Weather data included the day's high temperature (in tenths of degree Celsius), 
-precipitation (tenths of mm), and 
-average daily windspeed (km/h). 
+The Weather data included:
+* TMAX: high temperature (in tenths of degree Celsius), 
+* PRCP: precipitation (tenths of mm), and 
+* AWND: average daily windspeed (km/h). 
+
+Our R code from our EDA applies a season variable to the dataset, based on the date.
 
 ## Exploratory Data Analysis
 
@@ -180,10 +183,24 @@ that models would need to take into account not just variation within a year,
 but overall increasing usage over time.
 
 
+
 ## Key Predictors
 
 # Overview of Modeling
 Model Types and Comparison
+
+
+```{r linreg, echo=F, out.width="75%", fig.align="center"}
+final_df <- final_df %>% mutate(season = as_factor(season)) %>%  
+  mutate(day_of_week = as_factor(day_of_week))
+lin_reg <- lm(cnt ~ TMAX + PRCP + AWND + day_of_week + season, data = final_df)
+summary(lin_reg)
+pred <- predict(lin_reg, final_df)
+plot(final_df$cnt)
+lines(pred, col = 'red')
+```
+A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45
+
 Model Selection and Optimization
 Model Performance
 Detailed evaluation and interpretation of results

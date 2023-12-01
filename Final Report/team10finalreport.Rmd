@@ -130,6 +130,19 @@ final_df %>% ggplot() + geom_histogram(mapping = aes(PRCP, fill="PRCP"), bins = 
   )
 ```
 
+```{r windspeed, echo=F, out.width="60%", fig.align="center", message=FALSE}
+
+final_df %>% ggplot() + geom_histogram(mapping = aes(AWND, fill="AWND"), bins = 100, alpha = 1) +
+    labs(
+    x = "Windspeed in km/h",
+    y = "Density",
+    title = "Windspeed Distribution"
+  )
+```
+
+We see that windspeed and precipitation exhibit rightward skew, which makes sense:
+* Most days have no precipitation
+* Most days have moderate windspeed, while a few have very high windspeed
 
 
 ## Key Predictors

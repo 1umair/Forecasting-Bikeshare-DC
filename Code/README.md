@@ -20,7 +20,13 @@ For the most part, the `Combinedmodels` files contain the combination of all the
 
 We have run regression models to try and predict bike usage. These models can be seen both in the `Combinedmodels` files as well as `regression_models.R`
 
-The different models used: - Decision Trees - Random Forest - LightGBM - Linear Regression - LASSO
+The different models used: 
+
+- Decision Trees 
+- Random Forest 
+- LightGBM 
+- Linear Regression 
+- LASSO
 
 ### Time Series Models
 

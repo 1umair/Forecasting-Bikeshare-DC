@@ -162,6 +162,24 @@ highest in the summer, with spring and fall in between.
 
 Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
 
+```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
+final_df %>% mutate(season = as_factor(season)) %>%  
+  mutate(day_of_week = as_factor(day_of_week)) %>%
+  ggplot(mapping = aes(dteday, cnt, color = season)) +
+  geom_point() +
+  labs(
+    x = "Date",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Total Bike Usage Across All Times in Combined Dataset"
+  )
+```
+The most challenging aspect of our dataset is that usage was not static - it grew
+from 2011 through 2017. While this was obviously good for Capital Bikeshare, it meant
+that models would need to take into account not just variation within a year,
+but overall increasing usage over time.
+
+
 ## Key Predictors
 
 # Overview of Modeling

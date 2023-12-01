@@ -2,6 +2,8 @@ library(tidyverse)
 library(ggplot2)
 library(fpp2)
 
+IMAGE_FILE_PATH <- file.path(getwd(), 'Visualizations')
+
 # Data ----------------------------------
 rm(list=ls())
 fp <- file.path(getwd(), 'Other Resources', 
@@ -74,6 +76,7 @@ autoplot(train_Y) +
     y = 'Average Bike usage',
     caption = fcst$method
   )
+ggsave(file.path(IMAGE_FILE_PATH, 'arima.png'))
 
 # RMSE for ARIMA -------------------------
 arima.rmse <- sqrt(mean((fcst$mean - test_Y)^2))

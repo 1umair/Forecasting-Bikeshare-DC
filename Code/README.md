@@ -20,14 +20,11 @@ For the most part, the `Combinedmodels` files contain the combination of all the
 
 We have run regression models to try and predict bike usage. These models can be seen both in the `Combinedmodels` files as well as `regression_models.R`
 
-The different models used:
-- Decision Trees
-- Random Forest
-- LightGBM
-- Linear Regression
-- LASSO
+The different models used: - Decision Trees - Random Forest - LightGBM - Linear Regression - LASSO
 
 ### Time Series Models
+
+![](../Visualizations/arima.png){width="300"}
 
 All the time series models were built and tested in `time_series_models.R` as well as the folders `Prophet attempt` and `SARIMA attemp`. The best model was added to `Combinedmodels`, which was `ARIMA`. The models were also run using weekly data. Weekly was determined by taking the mean of the week of data. This allows for cleaner plots and helps to smooth over possible outliers.
 
@@ -39,20 +36,18 @@ The different models that were run were:
 -   Time Series Linear Regression
 -   Exponential Smoothing
 
-
 ## Packages Used
 
-- library(lightgbm)
-- library(tidyverse)
-- library(ggplot2)
-- library(fpp2)
-- library(dplyr)
-- library(caret)
-- library(randomForest)
-- library(xgboost)
-- library(data.table)
-- library(glmnet)
-- library(lubridate)
-- library(tidymodels)
-- library(rpart)
-
+-   library(lightgbm)
+-   library(tidyverse)
+-   library(ggplot2)
+-   library(fpp2)
+-   library(dplyr)
+-   library(caret)
+-   library(randomForest)
+-   library(xgboost)
+-   library(data.table)
+-   library(glmnet)
+-   library(lubridate)
+-   library(tidymodels)
+-   library(rpart)

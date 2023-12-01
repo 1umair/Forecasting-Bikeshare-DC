@@ -3,7 +3,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 suppressMessages(library(tidyverse))
 suppressMessages(library(corrplot))
 
-day <- read_csv('../Data/day.csv')
+day <- read_csv('../../Data/day.csv')
 
 head(day)
 # Notice that tidyverse has already recognized the dteday column as a date, which is helpful.
@@ -90,3 +90,4 @@ summary(simple_lm_casual)
 # It is interesting that a simple linear regression does better at predicting casual usage. We see more of the predictors are statistically significant at
 # p < .01 or even p < .001. This does reinforce my suspicion that we should be building multiple models.
 # Again, with heteroskedacity we wouldn't want all these in our final models.
+

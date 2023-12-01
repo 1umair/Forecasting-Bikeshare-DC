@@ -3,7 +3,8 @@ library(ggplot2)
 require(gridExtra)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-day <- read_csv("../data/day.csv") |>
+# This will import the original data and convert some of the columns to factors.
+day <- read_csv("../../Data/day.csv") |>
   rename(
     weather = weathersit,
     total_count = cnt
@@ -15,6 +16,7 @@ day <- read_csv("../data/day.csv") |>
     workingday = as.factor(workingday),
     weather = as.factor(weather)
   )
+# Setting values for the factor's levels
 levels(day$season) <- c('winter', 'spring', 'summer', 'fall')
 levels(day$workingday) <- c('weekend or holiday', 'weekday')
 levels(day$weekday) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
@@ -118,6 +120,8 @@ day |>
 day |>
   ggplot(mapping = aes(x = weather, y = weekday, fill = total_count)) +
   geom_tile()
+# According to the above, we can see that there doesn't appear to be any light
+# rain on Friday with Usage.
 
 day |>
   ggplot(mapping = aes(x = season, y = weekday, fill = total_count)) +
@@ -129,8 +133,8 @@ fit <- lm(total_count ~ ., day)
 summary(fit)
 
 # Hourly -------
-
-df_h <- read_csv("../Data/hour.csv") |>
+# Run the  same info above, but look at hourly instead.
+df_h <- read_csv("../../Data/hour.csv") |>
   rename(
     weather = weathersit,
     total_count = cnt

@@ -193,11 +193,8 @@ test_data  <- final_data[Date >= '2017-01-01']
 lm_model <- lm(Count ~ season + AWND + day_of_week + mnth_date + TMAX + year
                + PRCP, data = train_data)
 
-# Linear Regression
 lm_pred <- predict(lm_model, newdata = test_data)
 lm_rmse <- sqrt(mean((lm_pred - test_data$Count)^2))
-
-test_data$Count
 
 
 # Sample data frame
@@ -225,7 +222,6 @@ ggplot(df12, aes(x = Date)) +
 rf_model <- randomForest(Count ~ season + AWND + day_of_week + mnth_date + TMAX
                          + PRCP + year, data = train_data, ntree = 500)
 
-# Random Forest
 rf_pred <- predict(rf_model, newdata = test_data)
 rf_rmse <- sqrt(mean((rf_pred - test_data$Count)^2))
 

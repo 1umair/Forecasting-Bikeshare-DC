@@ -22,7 +22,7 @@ train_Y <- subset(Y, end = 209)
 test_Y <- subset(Y, start = 210)
 
 autoplot(train_Y) +
-  ggtitle("TIme Plot: Bikshare usage")
+  ggtitle("Time Plot: Bikshare usage")
 
 # Remove the trend
 DY <- diff(train_Y)

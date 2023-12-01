@@ -83,7 +83,8 @@ The dataset had required minimal cleaning. We had to convert several variables i
 Initial EDA on the dataset we began with indicated we did not have sufficient
 data to fit any models that could improve upon linear regression. So, we scraped
 and combined two different datasets. We used python scripts located in the
-Other Resources directory to do this.
+Other Resources directory to do this. Specifically, we ran get_bikeshare_data.py to get bikeshare data,
+then we ran join_data.py (which imports from noaa.py) to join the data with weather data from NOAA.
 
 * Capital Bikeshare usage data from 01-01-2013 through 12-31-2017, from
 Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)

@@ -1,15 +1,23 @@
 library(tidyverse)
 library(ggplot2)
 library(fpp2)
-
-IMAGE_FILE_PATH <- file.path(getwd(), 'Visualizations')
+set.seed(123)
 
 # Data ----------------------------------
 rm(list=ls())
-fp <- file.path(getwd(), 'Other Resources', 
-                'bikeshare_usage_weather_by_date.csv')
+IMAGE_FILE_PATH <- file.path(getwd(), 'Visualizations')
+# fp <- file.path(getwd(), 'Other Resources', 
+#                 'bikeshare_usage_weather_by_date.csv')
+fp <- file.path(getwd(), 'Data', 'final_df.csv')
 df <- read_csv(fp) |>
-  select(Date, Count, TMAX, PRCP, AWND)
+  # select(Date, Count, TMAX, PRCP, AWND)
+  select(dteday, TMAX, PRCP, AWND, season, day_of_week, mnth_date, day, cnt) |>
+  mutate(
+    Date = dteday,
+    season = factor(season),
+    day_of_week = factor(day_of_week),
+    Count = cnt
+  )
 
 # Break it down from daily to weekly to see and trends and seasons better.
 weekly_average <- df |>
@@ -19,9 +27,9 @@ weekly_average <- df |>
 
 
 # Set up TS data -------------------------
-Y <- ts(weekly_average$count, start = c(2012, 12), frequency = 52)
-train_Y <- subset(Y, end = 209)
-test_Y <- subset(Y, start = 210)
+Y <- ts(weekly_average$count, start = c(2010, 12), frequency = 52)
+train_Y <- subset(Y, end = 314)# 209
+test_Y <- subset(Y, start = 315) # 210
 
 autoplot(train_Y) +
   ggtitle("Time Plot: Bikshare usage")
@@ -42,7 +50,7 @@ ggseasonplot(DY) +
 fit <- snaive(DY)
 summary(fit)
 checkresiduals(fit)
-# Residual sd: 1791.0014 for weekly
+# Residual sd: 1637.04 for weekly
 
 
 # Fit ETS method ------------------
@@ -50,15 +58,17 @@ checkresiduals(fit)
 fit_ets <- ets(train_Y)
 summary(fit_ets)
 checkresiduals(fit_ets)
-# sigma:  1384.018    ETS(A,Ad,N) 
+# sigma:  1193.68    ETS(A,Ad,N) 
 
 
 # Fit ARIMA model ------------------
 fit_arima <- auto.arima(train_Y, d=1, stepwise = FALSE, trace = TRUE)
 summary(fit_arima)
 checkresiduals(fit_arima)
-# sigma: 1300.662     ARIMA(0,1,3)(0,1,1)[52]
-
+# sigma: 1162.504     ARIMA(3,1,1)(0,1,1)[52]
+fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
+summary(fit_arima)
+checkresiduals(fit_arima)
 
 # Forecast with ARIMA model -------------------------
 # The best model is ARIMA (comparing sigma), therefore let's use it to forecast.
@@ -81,7 +91,7 @@ ggsave(file.path(IMAGE_FILE_PATH, 'arima.png'))
 # RMSE for ARIMA -------------------------
 arima.rmse <- sqrt(mean((fcst$mean - test_Y)^2))
 arima.rmse
-# 1519.725
+# 1503.639
 
 # Holt-Winters ---------------------
 # We are still using the above Y, train_Y and test_Y
@@ -110,7 +120,7 @@ autoplot(train_Y) +
 
 hw.rmse <- sqrt(mean((hw.fcst$mean - test_Y)^2))
 hw.rmse
-# 1622.855
+# 2543.849
 
 
 # Linear Regression of TS -----------------
@@ -123,8 +133,10 @@ autoplot(train_Y) +
   autolayer(lm.fcst, series = 'Forecast', alpha=0.5) +
   autolayer(test_Y, series = 'Actual')
 
-lm.rmse <- sqrt(mean((flm$mean - test_Y)^2))
+lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
 lm.rmse
-# 1479.862
+# 1659.656
 
+# Output of RMSE ----------------
+list(lm = lm.rmse, hw = hw.rmse, arima = arima.rmse)
 

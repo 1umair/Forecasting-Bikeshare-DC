@@ -103,7 +103,7 @@ The Weather data included:
 * PRCP: precipitation (tenths of mm), and 
 * AWND: average daily windspeed (km/h). 
 
-The final merged dataset used for analysis is final_df.csv located in the Other Resources folder.
+The final merged dataset used for analysis is final_df.csv located in the Data folder.
 
 Our R code applies a season variable to the dataset, based on the date.
 
@@ -112,7 +112,7 @@ Our R code applies a season variable to the dataset, based on the date.
 ```{r usage_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
 library(tidyverse)
 library(ggplot2)
-final_df <- read_csv('../Other Resources/final_df.csv')
+final_df <- read_csv('../Data/final_df.csv')
 final_df %>% ggplot() + geom_histogram(mapping = aes(cnt, fill="Total"), alpha = 1) +
     labs(
     x = "Bike Usage per Day",

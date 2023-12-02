@@ -18,7 +18,7 @@ DATASETS
 
 5) dc_stations.csv: this dataset shows the different NOAA weather stations and station ids in the dc metro area.
 
-6) final_df.csv: this is the dataset used for most of our final report analysis. It is a combined dataset of daily Capital Bikeshaer usage across 2011 through 2018, incorporating weather data, day of week, and season in addition to date and count of users.
+6) final_df.csv: this is the dataset used for most of our final report analysis. It is a combined dataset of daily Capital Bikeshaer usage across 2011 through 2018, incorporating weather data, day of week, and season in addition to date and count of users. A copy is located in the Data folder.
 
 
 ========

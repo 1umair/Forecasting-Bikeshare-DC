@@ -121,6 +121,7 @@ final_df %>% ggplot() + geom_histogram(mapping = aes(cnt, fill="Total"), alpha =
     title = "Bikeshare Usage Per Day"
   )
 ```
+Fortunately, Bikeshare usage per day is not heavily skewed
 
 ```{r temp_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
 
@@ -193,11 +194,67 @@ from 2011 through 2017. While this was obviously good for Capital Bikeshare, it 
 that models would need to take into account not just variation within a year,
 but overall increasing usage over time.
 
+```{r temp_usage, echo=F, out.width="75%", fig.align="center"}
+final_df %>% mutate(season = as_factor(season)) %>%  
+  mutate(day_of_week = as_factor(day_of_week))
+  ggplot(mapping = aes(TMAX, cnt, color = season)) +
+  geom_point() +
+  labs(
+    x = "TMAX",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Total Bike Usage vs. Temperature and Season"
+  )
+```
+Consistent with our literature review, see that as temperature (TMAX) increases, usage
+tends to increase, until around 30 degrees celsius, after which usage tends to decrease.
 
+```{r prcp_usage, echo=F, out.width="75%", fig.align="center"}
+final_df %>% mutate(season = as_factor(season)) %>%  
+  mutate(day_of_week = as_factor(day_of_week)) %>%
+  ggplot(mapping = aes(PRCP, cnt, color = season)) +
+  geom_point() +
+  labs(
+    x = "PRCP",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Total Bike Usage vs. Precipitation and Season"
+  )
+```
+The relationship between precepitation and usage appears somewhat weaker than temperature.
+Still, the highest precipitation days tend not to have high usage, consitent with an overall negative effect of preciptiation on usage.
+
+```{r awnd_usage, echo=F, out.width="75%", fig.align="center"}
+final_df %>% mutate(season = as_factor(season)) %>%  
+  mutate(day_of_week = as_factor(day_of_week)) %>%
+  ggplot(mapping = aes(AWND, cnt, color = season)) +
+  geom_point() +
+  labs(
+    x = "AWND",
+    y = "Total Bike Usage",
+    title = "Total Bike Usage",
+    subtitle = "Total Bike Usage vs. Windspeed and Season"
+  )
+```
+We can also see a slightly negative relationship between windspeed and usage.
+
+A correlation matrix comparing our numeric variables validates our graphical EDA:
+* There is a positive correlation between temperature and count
+* There are negative correlations between precipitation and count, and windspeed and count
+
+We can also see the negative correlation of temperature with windspeed. Fortunately,
+precipitation has minimal correlation with temperature (-0.006) and relatively low
+correlation with windspeed (0.093).
+
+```{r correlation_matrix, echo=F, out.width="75%", fig.align="center"}
+final_df %>% select(TMAX, PRCP, AWND, cnt) %>% cor()
+```
 
 ## Key Predictors
 
 # Overview of Modeling
+
+For our modeling, we used the `final_df.csv` file in the Other Resources directory, which is described in the accompanying readme.
 
 Model Types and Comparison
 

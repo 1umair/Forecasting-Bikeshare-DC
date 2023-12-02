@@ -27,6 +27,7 @@ library(broom)
 
 * Introduction
 * Overview of Project
+* Literature Review Summary
 * Overview of Data
 * Overview of Modeling
 * Conclusion
@@ -45,6 +46,17 @@ The idea of the project was to use different data acquisition, cleaning and mode
 Some of the questions were: can we use the data to know when our usage is lower to repair bikes? When should we start increasing our fleet to best meet demand? Does weather and seasons have an impact on our business model? 
 
 We made an initial hypothesis that we would see a higher usage during the summer months and when the weather was nicer. With our initial exploratory data analysis, we could see that there is a trend and seasonality to the usage. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Does the season or weather have an affect?
+
+# Literature Review Summary
+
+We reviewed a few papers modeling bikeshare using in different cities across the globe
+(see Works Cited). These papers generally shared the same findings, which largely align
+with our Capital Bikeshare data:
+
+* Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit)
+* Precipitation of any amount discourages cycling
+* High winds can have a negative effect on cycling
+* Usage is often higher in spring and summer, and lowest in winter
 
 # Overview of Data
 

@@ -39,15 +39,6 @@ weekly_average <- df |>
 index_cutoff = nrow(as.data.table(weekly_average)[week < '2017-01-01'])
 
 Y <- ts(weekly_average$count, start = c(2012, 12), frequency = 52)
-#Y <- ts(df$Count, start = c(2012, 12), frequency = 365)
-
-# #split_index <- floor(0.8 * nrow(df))
-# train_indices <- seq_len(split_index)
-# test_indices <- seq(split_index + 1, nrow(df))
-# 
-# train_Y <- Y[train_indices]
-# test_Y  <- Y[test_indices]
-
 
 train_Y <- subset(Y, end = index_cutoff)
 test_Y <- subset(Y, start = index_cutoff)
@@ -170,9 +161,7 @@ final_data[,mnth_date := paste0(day,"_",mnth)]
 final_data[,year := year(Date)]
 
 set.seed(123)
-# trainIndex <- createDataPartition(final_data$cnt, p = 0.8, 
-#                                   list = FALSE, 
-#                                   times = 1)
+
 #Segregated Seasons into each categories
 final_data[,season := ifelse(
   (mnth == 3 & day >=21) | (mnth >= 4 & mnth <= 5) | (mnth == 6 & day <= 20),"2",

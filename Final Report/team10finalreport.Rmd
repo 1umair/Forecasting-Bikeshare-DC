@@ -5,11 +5,17 @@ header-includes:
 - \fancypagestyle{plain}{\pagestyle{fancy}}
 - \headheight 35pt
 - \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir \\}
-- "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
-  - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
-output:
-  html_document:
-    df_print: paged
+- \fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Final Report} \\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}
+- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023 \\}
+- \fancyfoot[RE,RO]{\small \thepage}
+- \fancyfoot[CE,CO]{}
+- \headsep 1.5em
+output: pdf_document
+# - "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
+#   - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
+# output:
+#   html_document:
+#     df_print: paged
 fontsize: 11pt
 ---
 
@@ -20,7 +26,10 @@ library(ggplot2)
 require(gridExtra)
 library(kableExtra)
 library(broom)
+
+final_df <- read_csv('../Data/final_df.csv')
 ```
+
 # Forecasting Bikesharing Usage for DC's Capital Bikshare System
 
 # Table of Contents
@@ -99,6 +108,7 @@ The Bikeshare data only counted trips taken, and did not distinguish between
 registered or casual users.
 
 The Weather data included:
+
 * TMAX: high temperature (in tenths of degree Celsius), 
 * PRCP: precipitation (tenths of mm), and 
 * AWND: average daily windspeed (km/h). 
@@ -109,47 +119,47 @@ Our R code applies a season variable to the dataset, based on the date.
 
 ## Exploratory Data Analysis
 
-```{r usage_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
-library(tidyverse)
-library(ggplot2)
-final_df <- read_csv('../Data/final_df.csv')
-final_df %>% ggplot() + geom_histogram(mapping = aes(cnt, fill="Total"), alpha = 1) +
+We can see that fortunately, Bikeshare usage per day is not heavily skewed.
+
+```{r hist_plots, echo=F, fig.align="center", message=FALSE}
+usage_hist <- final_df %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(cnt), fill = 'red', alpha = 0.5) +
     labs(
     x = "Bike Usage per Day",
     y = "Density",
     title = "Bikeshare Usage Per Day"
   )
-```
-Fortunately, Bikeshare usage per day is not heavily skewed
 
-```{r temp_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
-
-final_df %>% ggplot() + geom_histogram(mapping = aes(TMAX, fill="TMAX"), alpha = 1) +
-    labs(
-    x = "Daily High Temperature in Tenths of Degree Celsius",
+temp_hist <- final_df %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(TMAX), fill = 'red', alpha = 0.5) +
+  labs(
+    x = "Daily High Temperature",
     y = "Density",
-    title = "Temperature Distribution"
+    title = "Temperature Distribution",
+    subtitle = "Tenths of Degree Celsius"
   )
-```
 
-```{r precp_hist, echo=F, out.width="60%", fig.align="center", message=FALSE}
-
-final_df %>% ggplot() + geom_histogram(mapping = aes(PRCP, fill="PRCP"), bins = 100, alpha = 1) +
-    labs(
+prec_hist <- final_df %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(PRCP), fill = 'red', alpha = 0.5, bins = 100) +
+  labs(
     x = "Precipitation in mm",
     y = "Density",
     title = "Precipitation Distribution"
   )
-```
 
-```{r windspeed, echo=F, out.width="60%", fig.align="center", message=FALSE}
-
-final_df %>% ggplot() + geom_histogram(mapping = aes(AWND, fill="AWND"), bins = 100, alpha = 1) +
-    labs(
+windspeed_hist <- final_df %>%
+  ggplot() +
+  geom_histogram(mapping = aes(AWND), fill = 'red', alpha = 0.5, bins = 100) +
+  labs(
     x = "Windspeed in km/h",
     y = "Density",
     title = "Windspeed Distribution"
   )
+
+grid.arrange(usage_hist, temp_hist, prec_hist, windspeed_hist, ncol=2)
 ```
 
 We see that windspeed and precipitation exhibit rightward skew, which makes sense:
@@ -158,9 +168,16 @@ We see that windspeed and precipitation exhibit rightward skew, which makes sens
 
 By contrast, temperature has leftward skew, with a smaller number of colder days
 
-```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
-final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week)) %>%
+```{r weekday_usage, echo=F, out.width="60%", fig.align="center"}
+df_plot <- final_df |>
+  mutate(
+    season = factor(season),
+    day_of_week = factor(day_of_week)
+  )
+levels(df_plot$season) <- c('winter', 'spring', 'summer', 'fall')
+levels(df_plot$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
+
+df_plot %>% 
   ggplot(mapping = aes(day_of_week, cnt, color = season)) +
   geom_boxplot() +
   labs(
@@ -170,15 +187,13 @@ final_df %>% mutate(season = as_factor(season)) %>%
     subtitle = "Given Weekday and Season"
   )
 ```
-We can see in the above chart the effect of season (1 = Winter, 2 = Spring, 3 = Summer,  4= Fall)
-as well as the effects of the day of the week on total bikeshare usage. Usage is lowest in the winter,
+We can see in the above chart the effect of season as well as the effects of the day of the week on total bikeshare usage. Usage is lowest in the winter,
 highest in the summer, with spring and fall in between.
 
 Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
 
-```{r weekday_usage2, echo=F, out.width="75%", fig.align="center"}
-final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week)) %>%
+```{r weekday_usage2, echo=F, out.width="60%", fig.align="center"}
+df_plot %>% 
   ggplot(mapping = aes(dteday, cnt, color = season)) +
   geom_point() +
   labs(
@@ -193,46 +208,44 @@ from 2011 through 2017. While this was obviously good for Capital Bikeshare, it 
 that models would need to take into account not just variation within a year,
 but overall increasing usage over time.
 
-```{r temp_usage, echo=F, out.width="75%", fig.align="center"}
-final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week))
+```{r temp_usage, echo=F, out.width="60%", fig.align="center"}
+df_plot %>%
   ggplot(mapping = aes(TMAX, cnt, color = season)) +
   geom_point() +
   labs(
-    x = "TMAX",
+    x = "Max Temperature",
     y = "Total Bike Usage",
-    title = "Total Bike Usage",
-    subtitle = "Total Bike Usage vs. Temperature and Season"
+    title = "Total Bike Usage by Season relative to Temperature",
+    subtitle = "Total Bike Usage vs. Temperature",
+    caption = "Temperature in Tenths of Degree Celsius"
   )
 ```
-Consistent with our literature review, see that as temperature (TMAX) increases, usage
-tends to increase, until around 30 degrees celsius, after which usage tends to decrease.
+Consistent with our literature review, see that as temperature increases, usage
+tends to increase, until around 30 degrees Celsius, after which usage tends to decrease.
 
-```{r prcp_usage, echo=F, out.width="75%", fig.align="center"}
-final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week)) %>%
+```{r prcp_usage, echo=F, out.width="60%", fig.align="center"}
+df_plot %>%
   ggplot(mapping = aes(PRCP, cnt, color = season)) +
   geom_point() +
   labs(
-    x = "PRCP",
+    x = "Precipitation (tenths of mm)",
     y = "Total Bike Usage",
-    title = "Total Bike Usage",
-    subtitle = "Total Bike Usage vs. Precipitation and Season"
+    title = "Total Bike Usage by Season relative to Precipitation",
+    subtitle = "Total Bike Usage vs. Precipitation",
   )
 ```
 The relationship between precepitation and usage appears somewhat weaker than temperature.
 Still, the highest precipitation days tend not to have high usage, consitent with an overall negative effect of preciptiation on usage.
 
-```{r awnd_usage, echo=F, out.width="75%", fig.align="center"}
-final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week)) %>%
+```{r awnd_usage, echo=F, out.width="60%", fig.align="center"}
+df_plot %>%
   ggplot(mapping = aes(AWND, cnt, color = season)) +
   geom_point() +
   labs(
-    x = "AWND",
+    x = "Average Daily Windspeed (km/h)",
     y = "Total Bike Usage",
-    title = "Total Bike Usage",
-    subtitle = "Total Bike Usage vs. Windspeed and Season"
+    title = "Total Bike Usage by Season relative to Windspeed",
+    subtitle = "Total Bike Usage vs. Windspeed"
   )
 ```
 We can also see a slightly negative relationship between windspeed and usage.
@@ -246,7 +259,10 @@ precipitation has minimal correlation with temperature (-0.006) and relatively l
 correlation with windspeed (0.093).
 
 ```{r correlation_matrix, echo=F, out.width="75%", fig.align="center"}
-final_df %>% select(TMAX, PRCP, AWND, cnt) %>% cor()
+final_df %>% 
+  select(TMAX, PRCP, AWND, cnt) %>% 
+  cor() |>
+  kable()
 ```
 
 ## Key Predictors

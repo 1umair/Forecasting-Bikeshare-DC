@@ -5,17 +5,11 @@ header-includes:
 - \fancypagestyle{plain}{\pagestyle{fancy}}
 - \headheight 35pt
 - \fancyhead[LE,LO]{Abowath, Blakely, \\ Garrison, Loui, Peir \\}
-- \fancyhead[CO,CE]{\textbf{\Large Forecasting Bikesharing Usage \\ Team 10 - Final Report} \\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}
-- \fancyhead[RE,RO]{MGT 6203 \\ Fall 2023 \\}
-- \fancyfoot[RE,RO]{\small \thepage}
-- \fancyfoot[CE,CO]{}
-- \headsep 1.5em
-output: pdf_document
-# - "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
-#   - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
-# output:
-#   html_document:
-#     df_print: paged
+- "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
+  - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
+output:
+  html_document:
+    df_print: paged
 fontsize: 11pt
 ---
 
@@ -27,6 +21,8 @@ require(gridExtra)
 library(kableExtra)
 library(broom)
 library(fpp2)
+library(data.table)
+library(lightgbm)
 set.seed(123)
 
 final_df <- read_csv('../Data/final_df.csv') |>
@@ -45,61 +41,67 @@ levels(final_df$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sa
 
 * Introduction
 * Overview of Project
+* Literature Review Summary
 * Overview of Data
 * Overview of Modeling
 * Conclusion
-* Literature Review Summary
 * Works Cited
 
 # Introduction
 
-Bike sharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. Due to the bike being used in place of the car in some situations, the riding of bikes helps to improve the lives of both users. It also help non-users since it reduces the number of cars on the road and $CO_2$ emissions. We used data from the DC Capital Bikeshare from 2011 to 2017. 
+Bikesharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. The riding of bikes helps to improve the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We used data from the DC Capital Bikeshare from 2011 to 2017. 
 
 The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that forecasts the usage based on certain predictor variables.
 
 # Overview of Project
 
-The idea of the project was to use different data acquisition, cleaning and modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast the usage, then it would allow the company to plan for the best route to increase their fleet as well as expanding the available stations that are offered. A station is a location where the bikes are stored and can be rented.
+The idea of the project was to use different data acquisition, cleaning and modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast the bike usage, then it would allow the company to plan for the best route to increasing our fleet as well as expanding the available stations that are offered.
 
-Some of the questions were: can we use the data to know when our usage is lower to repair bikes? When should we start increasing our fleet to best meet demand? Does weather and seasons have an impact on the business model? 
+Some of the questions were: can we use the data to know when our usage is lower to repair bikes? When should we start increasing our fleet to best meet demand? Does weather and seasons have an impact on our business model? 
 
-We made an initial hypothesis that we would see a higher usage during the summer months and when the weather was nice (sunny no rain). With our initial exploratory data analysis, we could see that the usage data contains a trend and seasonality. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Does the season or weather have an impact?
+We made an initial hypothesis that we would see a higher usage during the summer months and when the weather was nicer. With our initial exploratory data analysis, we could see that there is a trend and seasonality to the usage. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Does the season or weather have an affect?
 
+# Literature Review Summary
+
+We reviewed a few papers modeling bikeshare using in different cities across the globe
+(see Works Cited). These papers generally shared the same findings, which largely align
+with our Capital Bikeshare data:
+
+* Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit)
+* Precipitation of any amount discourages cycling
+* High winds can have a negative effect on cycling
+* Usage is often higher in spring and summer, and lowest in winter
 
 # Overview of Data
 
 ## Initial Data Set:
 
-We started by just looking at two years of Capital Bikeshare usage from this dataset: [https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)
+We started by just looking at two years of Capital Bikeshare usage from this dataset:
+https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset 
 
-The dataset contains 2011 and 2012 historical usage data from Washington DC’s public Capital Bikeshare program. This is one of the first large scale 
-bikeshare programs in the nation. Usage data is broken out by day and by hour. Additional data included a variety of information on weather, season, and whether a day was a holiday.
+The dataset contains 2011 and 2012 historical usage data from Washington, DC’s public 
+Capital Bikeshare program, one of the first large scale 
+bikeshare programs in the nation. Usage data is broken out by day and by hour.
+Additional data included a variety of information on weather, season, and whether
+a day was a holiday.
 
 ## Data Cleaning Process
 
 The dataset had required minimal cleaning. We had to convert several variables into factor variables (`season`, `holiday`, `weekday`, `workingday`, `weather`). Additionally we noted that the key for our dataset mislabeled the season variable, which was trivial to correct. Fortunately, there was no missing data.
 
-### Additional Scraping, Cleaning
+## Additional Scraping, Cleaning
 
-Initial exploratory data analysis (EDA) performed on the dataset indicated we did not have sufficient data to fit any models. We found that we could scrape the Capital Bikeshare website in order to acquire more usage data. The only issue with this is that it didn't include weather data. Therefore, we decided to also scrape weather data. 
+Initial EDA on the dataset we began with indicated we did not have sufficient
+data to fit any models that could improve upon linear regression. So, we scraped
+and combined two different datasets. We used python scripts located in the
+Other Resources directory to do this. 
 
-We used python scripts located in the `Other Resources` directory to do this. 
+Specifically, we ran get_bikeshare_data.py to get bikeshare data from Capital Bikeshare directly, 
+then we ran join_data.py (which imports from noaa.py) to join the data 
+with weather data from the NOAA API. 
 
-Specifically, we ran `get_bikeshare_data.py` to get bikeshare data from Capital Bikeshare's website directly, then we ran `join_data.py` (which imports from `noaa.py`) to join the data with weather data from the NOAA API. All these code files can be found in our `Other Resources` directory.
-
-Upon scraping the additional data, we combined this with our initial data set to create a new dataset that spanned from 2011 to 2017. We also added a few new feature variables such as `season`, which was missing from the new scraped dataset.
-
-Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily, which is how the new dataset was created, we created one that was weekly. By creating a weekly data set, we are taking the mean of the usage. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner more presentable dataset. This also makes sense to have it on a weekly, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
-
-Therefore, we had one dataset that we performed EDA and performed linear regression and LightGBM on. All time series models were run against the weekly dataset.
-
-#### The Weather data included:
-
-* `TMAX`: high temperature (in tenths of degree Celsius), 
-* `PRCP`: precipitation (tenths of mm), and 
-* `AWND`: average daily wind speed (km/h). 
-
-The final merged dataset used for analysis is `final_df.csv` located in the `Data` folder.
+We used the same process to add the additional weather columns 
+to the 2011 and 2012 as well.
 
 ### Sources for additional datasets:
 
@@ -107,9 +109,22 @@ The final merged dataset used for analysis is `final_df.csv` located in the `Dat
 Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
 * Weather data for DC for the same time period, from NOAA (https://www.ncdc.noaa.gov/cdo-web/webservices/v2)
 
+The Bikeshare data only counted trips taken, and did not distinguish between
+registered or casual users.
+
+The Weather data included:
+
+* TMAX: high temperature (in tenths of degree Celsius), 
+* PRCP: precipitation (tenths of mm), and 
+* AWND: average daily windspeed (km/h). 
+
+The final merged dataset used for analysis is final_df.csv located in the Data folder.
+
+Our R code applies a season variable to the dataset, based on the date.
+
 ## Exploratory Data Analysis
 
-We can see that fortunately, Bikeshare usage per day is not heavily skewed, but has closer to a normal distribution.
+We can see that fortunately, Bikeshare usage per day is not heavily skewed.
 
 ```{r hist_plots, echo=F, fig.align="center", message=FALSE}
 usage_hist <- final_df %>% 
@@ -144,22 +159,19 @@ windspeed_hist <- final_df %>%
   ggplot() +
   geom_histogram(mapping = aes(AWND), fill = 'red', alpha = 0.5, bins = 100) +
   labs(
-    x = "Wind Speed in km/h",
+    x = "Windspeed in km/h",
     y = "Density",
-    title = "Wind Speed Distribution"
+    title = "Windspeed Distribution"
   )
 
 grid.arrange(usage_hist, temp_hist, prec_hist, windspeed_hist, ncol=2)
 ```
 
-We can see that the temperature distribution has a leftward skew. This makes intuitive since because there would be fewer cold days.
-
-We can also see that wind speed and precipitation exhibit rightward skew, which makes sense:
-
+We see that windspeed and precipitation exhibit rightward skew, which makes sense:
 * Most days have no precipitation
-* Most days have moderate wind speed, while a few have very high wind speed
+* Most days have moderate windspeed, while a few have very high windspeed
 
-The data depicts that there is a "steady" state for each of the distributions that the data is trying to form around. We expect that in general we would have warmer days with less rain and low wind speeds. 
+By contrast, temperature has leftward skew, with a smaller number of colder days
 
 ```{r weekday_usage, echo=F, out.width="60%", fig.align="center"}
 final_df %>% 
@@ -172,8 +184,10 @@ final_df %>%
     subtitle = "Given Weekday and Season"
   )
 ```
+We can see in the above chart the effect of season as well as the effects of the day of the week on total bikeshare usage. Usage is lowest in the winter,
+highest in the summer, with spring and fall in between.
 
-We can see in the above chart the effect of season on the bike share usage. Usage is lowest in the winter, highest in the summer, with spring and fall in between. For the most part, the usage per weekday seems to be consistent with minor fluctuation (correlating seasons). Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
+Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
 
 ```{r weekday_usage2, echo=F, out.width="60%", fig.align="center"}
 final_df %>% 
@@ -186,22 +200,25 @@ final_df %>%
     subtitle = "Total Bike Usage Across All Times in Combined Dataset"
   )
 ```
-
-The most challenging aspect of our dataset is that usage was not static. It grew from 2011 through 2017, which shows an upward trend. While this was obviously good for Capital Bikeshare, it meant that models would need to take into account not just variation within a year but an upward trend.
+The most challenging aspect of our dataset is that usage was not static - it grew
+from 2011 through 2017. While this was obviously good for Capital Bikeshare, it meant
+that models would need to take into account not just variation within a year,
+but overall increasing usage over time.
 
 ```{r temp_usage, echo=F, out.width="60%", fig.align="center"}
 final_df %>%
   ggplot(mapping = aes(TMAX, cnt, color = season)) +
   geom_point() +
   labs(
-    x = "Max Temperature (Tenths of Degree Celsius)",
+    x = "Max Temperature",
     y = "Total Bike Usage",
     title = "Total Bike Usage by Season relative to Temperature",
-    subtitle = "Total Bike Usage vs. Temperature"
+    subtitle = "Total Bike Usage vs. Temperature",
+    caption = "Temperature in Tenths of Degree Celsius"
   )
 ```
-
-Consistent with our literature review, we see that as temperature increases usage tends to increase until around 30 degrees Celsius, after which usage tends to decrease.
+Consistent with our literature review, see that as temperature increases, usage
+tends to increase, until around 30 degrees Celsius, after which usage tends to decrease.
 
 ```{r prcp_usage, echo=F, out.width="60%", fig.align="center"}
 final_df %>%
@@ -214,26 +231,30 @@ final_df %>%
     subtitle = "Total Bike Usage vs. Precipitation",
   )
 ```
-
-The relationship between precipitation and usage appears somewhat weaker than temperature. Still, the highest precipitation days tend not to have high usage, consistent with an overall negative effect of precipitation on usage. This is also somewhat hard to definitively define, unlike temperature, since rain isn't as consistent. You could almost see higher precipitation as an outlier in the data. 
+The relationship between precepitation and usage appears somewhat weaker than temperature.
+Still, the highest precipitation days tend not to have high usage, consitent with an overall negative effect of preciptiation on usage.
 
 ```{r awnd_usage, echo=F, out.width="60%", fig.align="center"}
 final_df %>%
   ggplot(mapping = aes(AWND, cnt, color = season)) +
   geom_point() +
   labs(
-    x = "Average Daily Wind Speed (km/h)",
+    x = "Average Daily Windspeed (km/h)",
     y = "Total Bike Usage",
-    title = "Total Bike Usage by Season relative to Wind Speed",
+    title = "Total Bike Usage by Season relative to Windspeed",
     subtitle = "Total Bike Usage vs. Windspeed"
   )
 ```
-We can also see a slightly negative relationship between wind speed and usage.
+We can also see a slightly negative relationship between windspeed and usage.
 
-A correlation matrix comparing our temperature, precipitation, wind speed and usage variables validates our graphical EDA:
+A correlation matrix comparing our numeric variables validates our graphical EDA:
 
 * There is a positive correlation between temperature and count
-* There are negative correlations between precipitation and count, as well as wind speed and count
+* There are negative correlations between precipitation and count, and windspeed and count
+
+We can also see the negative correlation of temperature with windspeed. Fortunately,
+precipitation has minimal correlation with temperature (-0.006) and relatively low
+correlation with windspeed (0.093).
 
 ```{r correlation_matrix, echo=F, out.width="75%", fig.align="center"}
 final_df %>% 
@@ -242,22 +263,19 @@ final_df %>%
   kable()
 ```
 
-We can also see the negative correlation of temperature with wind speed. Fortunately, precipitation has minimal correlation with temperature (-0.006) and relatively low correlation with wind speed (0.093). You would expect wind speed and precipitation to be somewhat correlated since there is often a breeze when it is raining.
-
 ## Key Predictors
-The key predictors for time series will be time, which is made up of a trend and seasonality component. 
 
 # Overview of Modeling
 
-For our modeling, we used the `final_df.csv` file in the `Data` directory, which is described in the accompanying readme on GitHub page. We also used an edited data set that converted the above dataset into weekly instead of daily for the time series models. We wanted to run models that were able to forecast in the future as well as the capability of classifying on a daily basis. We decided to use time series models to forecast into the future. We used different trees, gradient boosting and regression models to be able to classify the bike usage given some inputs.
+For our modeling, we used the `final_df.csv` file in the `Data` directory, which is described in the accompanying readme.
 
 ## Model Types and Comparison
-We ran multiple different models to try to best determine what fits the data best. Ideally since we are dealing with time series data, we are expecting that it will be the best at predicting. We decided to only showcase three of the models in this paper. The three are Linear Regression (with and without time series), ARIMA and LightGBM (gradient boosting). Other models were run and can be found in our `Code/Models` directory.
+We ran multiple different models to try and best determine what fits the data best. Ideally since we are dealing with time series data, we are expecting that it will be the best at predicting. We decided to only showcase three of the models in this paper. The three are LASSO, ARIMA and LightGBM (gradient boosting).
 
 ### Linear Regression
 This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to calculate a trend.
 
-```{r linreg, echo=F, out.width="60%", fig.align="center", results='hide'}
+```{r linreg, echo=F, out.width="75%", fig.align="center", results='hide'}
 model_df <- final_df |>
   select(-dteday)
 fit <- lm(cnt ~ ., data = model_df)
@@ -277,11 +295,10 @@ model_df |>
   )
 ```
 
-A naive linear regression does not incorporate any time series factors such as trend. It has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component.
+A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component.
 
 ### Linear Regression with Time Series
-Since we can see above that we are unable to predict without time series, we decided to create a model that attempts to predict with trend and seasonality.
-
+Since we can see above that we are unable to predict without time series, what if we create a model that attempts to predict with trend and seasonality.
 ```{r ts_dataframe, echo=F, results='hide', message=FALSE}
 ts_df <- read_csv('../Data/final_df.csv') |>
   mutate(
@@ -299,7 +316,7 @@ train_Y <- subset(Y, end = 314)
 test_Y <- subset(Y, start = 315)
 ```
 
-Therefore, the data was changed for the time series models to use weekly data instead of daily. The reason is for cleaner plots and reduced time in calculating some of the time series models. The total bike usage was determined by taking the average over a week's time.
+The data was changed for the time series models to use weekly data instead of daily. The reason is for cleaner plots and reduced time in calculating some of the time series models. The total count was determined by taking the average over a week's time.
 
 ```{r linreg_ts, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 lm.fit <- tslm(train_Y ~ trend + season)
@@ -318,10 +335,10 @@ lm.rmse
 # 1659.656
 ```
 
-By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model using a test set, we have a RMSE of **1659.65**. The test set is the entire year of 2017. It was with held from the training data.
+By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model we have a RMSE of **1659.65**.
 
 ### ARIMA
-When plotting the data as well as seeing the above Linear Regression with Time Series, we know we have a time series problem. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
+When plotting the data as well as seeing the above Linear Regression with Time Series, one of the best models for dealing with Time Series is the ARIMA and its derivatives. 
 
 ```{r arima, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
@@ -345,6 +362,195 @@ It was determined that the best ARIMA model for our data was `order = (3, 1, 1)`
 
 ### LightGBM
 
+```{r Lightgbm, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
+
+final_data <- read_csv('../Data/final_df.csv') |>
+  select(
+    Date = dteday,
+    season = season, #factor(season),
+    day_of_week = day_of_week,#factor(day_of_week),
+    TMAX = TMAX,
+    AWND = AWND,
+    PRCP = PRCP,
+    day = day,
+    Count = cnt
+  )
+setDT(final_data)
+final_data[,year := year(Date)]
+
+final_data$season <- as.factor(final_data$season)
+final_data$day <- as.factor(final_data$day)
+final_data$TMAX <- as.numeric(final_data$TMAX)
+final_data$PRCP <- as.numeric(final_data$PRCP)
+final_data$AWND <- as.numeric(final_data$AWND)
+
+
+train_data <- final_data[Date < '2017-01-01']
+test_data  <- final_data[Date >= '2017-01-01']
+
+suppressWarnings({
+train_dataset <- lgb.Dataset(data = as.matrix(train_data[, -c("Count","Date")]),
+                             label = train_data$Count,
+                             categorical_feature = c("season", "day",
+                                                     "day_of_week"
+                             ))
+})
+
+suppressWarnings({
+test_dataset <- lgb.Dataset(data = as.matrix(test_data[, -c("Count","Date")]),
+                            label = test_data$Count,
+                            categorical_feature = c("season", "day",
+                                                    "day_of_week"
+                            ))
+})
+
+# Specify LightGBM parameters
+params <- list(objective = "regression",
+               metric = "rmse",
+               boosting_type = "gbdt")
+
+# Train the LightGBM model
+params$silent <- TRUE
+
+# Train the LightGBM model for daily forecast
+suppressWarnings({
+  lgb_model <- lgb.train(params = params,
+                         data = train_dataset,
+                         nrounds = 100,
+                         valids = list(test = test_dataset))
+})
+suppressWarnings({
+lgb_pred <- predict(lgb_model, as.matrix(test_data[, -c("Count","Date")]))
+})
+
+lgb_rmse <- sqrt(mean((lgb_pred - test_data$Count)^2))
+
+#print(cat("LightGBM RMSE Daily forecast:", lgb_rmse, "\n"))
+print(paste0("LightGBM RMSE Daily forecast:", lgb_rmse ))
+
+
+df12 <- data.frame(
+  Date = test_data$Date,
+  Actual = test_data$Count,
+  Predited = lgb_pred
+)
+
+suppressWarnings({
+df12 = rbind(data.frame(
+  Date = train_data$Date,
+  Actual = train_data$Count,
+  Predited = predict(lgb_model, as.matrix(train_data[, -c("Count","Date")]))
+),
+df12
+)
+})
+
+
+# Plotting using ggplot2
+ggplot(df12, aes(x = Date)) +
+  geom_line(aes(y = Actual, color = "Actual"), size = 1) +
+  geom_line(aes(y = Predited, color = "Predited"), size = 1) +
+  labs(title = paste0("Acutal vs predicted - Day wise forecast Lightgbm RMSE: ",lgb_rmse ),
+       x = "Date",
+       y = "Values") +
+  scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
+  theme_minimal()
+
+#---- Week wise ---#
+
+final_data <- read_csv('../Data/final_df.csv') |>
+  select(
+    Date = dteday,
+    season = season, #factor(season),
+    day_of_week = day_of_week,#factor(day_of_week),
+    TMAX = TMAX,
+    AWND = AWND,
+    PRCP = PRCP,
+    day = day,
+    Count = cnt
+  )
+setDT(final_data)
+final_data[,year := year(Date)]
+
+final_data <- final_data[,.(Date = min(Date), season = toString(unique(season)), TMAX = mean(TMAX), AWND = mean(AWND), PRCP = mean(PRCP), Count = mean(Count) ), 
+           by = .(year(Date),mnth = month(Date),week(Date))]
+
+
+final_data$season <- as.factor(final_data$season)
+final_data$mnth <- as.factor(final_data$mnth)
+final_data$TMAX <- as.numeric(final_data$TMAX)
+final_data$PRCP <- as.numeric(final_data$PRCP)
+final_data$AWND <- as.numeric(final_data$AWND)
+
+
+train_data_week <- final_data[Date < '2017-01-01']
+test_data_week  <- final_data[Date >= '2017-01-01']
+
+suppressWarnings({
+train_dataset_week <- lgb.Dataset(data = as.matrix(train_data_week[, -c("Count","Date")]),
+                             label = train_data_week$Count,
+                             categorical_feature = c("season", "mnth"
+                             ))
+})
+
+suppressWarnings({
+test_dataset_week <- lgb.Dataset(data = as.matrix(test_data_week[, -c("Count","Date")]),
+                            label = test_data_week$Count,
+                            categorical_feature = c("season", "mnth"
+                            ))
+})
+
+# Specify LightGBM parameters
+params <- list(objective = "regression",
+               metric = "rmse",
+               boosting_type = "gbdt")
+
+params$silent <- TRUE
+# Train the LightGBM model
+suppressWarnings({
+  lgb_model_week <- lgb.train(params = params,
+                              data = train_dataset_week,
+                              nrounds = 100,
+                              valids = list(test = test_dataset_week))
+})
+
+suppressWarnings({
+lgb_pred_week <- predict(lgb_model_week, as.matrix(test_data_week[, -c("Count","Date")]))
+})
+
+lgb_rmse_week <- sqrt(mean((lgb_pred_week - test_data_week$Count)^2))
+
+print(paste0("LightGBM RMSE Week forecast:", lgb_rmse_week ))
+
+df12_week <- data.frame(
+  Date = test_data_week$Date,
+  Actual = test_data_week$Count,
+  Predited = lgb_pred_week
+)
+
+suppressWarnings({
+df12_week = rbind(data.frame(
+  Date = train_data_week$Date,
+  Actual = train_data_week$Count,
+  Predited = predict(lgb_model_week, as.matrix(train_data_week[, -c("Count","Date")]))
+),
+df12_week
+)
+})
+
+# Plotting using ggplot2
+ggplot(df12_week, aes(x = Date)) +
+  geom_line(aes(y = Actual, color = "Actual"), size = 1) +
+  geom_line(aes(y = Predited, color = "Predited"), size = 1) +
+  labs(title = paste0("Acutal vs predicted - Week wise forecast Lightgbm RMSE: ", lgb_rmse_week),
+       x = "Date",
+       y = "Values") +
+  scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
+  theme_minimal()
+
+```
+We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample i.e the test data set. Pre 2017, the predicted line describes the fitting on the training data set itself.
+However, despite the overall success in capturing trends, there's a notable limitation in predicting the increase in usage observed in 2017. The RMSE (Root Mean Squared Error) of weekly forecast is lower than daily forecast as it is able to remove the noise in the data and capture it well. Nevertheless, the model still struggles to accurately predict the surge in usage during 2017.
 
 ## Model Selection and Optimization
 
@@ -354,16 +560,7 @@ It was determined that the best ARIMA model for our data was `order = (3, 1, 1)`
 
 # Conclusion
 
-One finding was that forecasting effectively requires more data than two years of usage. Our initial time series models trained on 2011-2012 data and performed poorly. They were unable to learn the trend and seasonality with so little time.
-
-# Literature Review Summary
-
-We reviewed a few papers modeling bikeshare usage in different cities across the globe (see Works Cited). These papers generally shared the same findings, which largely align with our Capital Bikeshare data:
-
-* Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit)
-* Precipitation of any amount discourages cycling
-* High winds can have a negative effect on cycling
-* Usage is often higher in spring and summer, and lowest in winter
+One finding was that forecasting effectively requires more data than two years of usage. Our initial models trained just on 2011-2012 data did not greatly outperform linear regression.
 
 # Works Cited
 

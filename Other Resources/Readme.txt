@@ -20,7 +20,7 @@ DATASETS
 
 6) final_df.csv: this is the dataset used for most of our final report analysis. It is a combined dataset of daily Capital Bikeshaer usage across 2011 through 2018, incorporating weather data, day of week, and season in addition to date and count of users. A copy is located in the Data folder.
 
-
+7) bikeshare_usage_by_date_and_hour: This dataset tracks the daily bike share count from 2013 to 2017 in the Capital bikeshare system. This was used in our initial exploratory data analysis
 ========
 CODE
 ========

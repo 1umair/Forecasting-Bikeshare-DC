@@ -6,11 +6,8 @@ set.seed(123)
 # Data ----------------------------------
 rm(list=ls())
 IMAGE_FILE_PATH <- file.path(getwd(), 'Visualizations')
-# fp <- file.path(getwd(), 'Other Resources', 
-#                 'bikeshare_usage_weather_by_date.csv')
 fp <- file.path(getwd(), 'Data', 'final_df.csv')
 df <- read_csv(fp) |>
-  # select(Date, Count, TMAX, PRCP, AWND)
   select(dteday, TMAX, PRCP, AWND, season, day_of_week, mnth_date, day, cnt) |>
   mutate(
     Date = dteday,

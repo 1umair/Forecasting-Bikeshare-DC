@@ -26,8 +26,17 @@ library(ggplot2)
 require(gridExtra)
 library(kableExtra)
 library(broom)
+library(fpp2)
+set.seed(123)
 
-final_df <- read_csv('../Data/final_df.csv')
+final_df <- read_csv('../Data/final_df.csv') |>
+  mutate(
+    season = factor(season),
+    day_of_week = factor(day_of_week)
+  ) |>
+  select(-...1, -mnth_date)
+levels(final_df$season) <- c('winter', 'spring', 'summer', 'fall')
+levels(final_df$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
 ```
 
 # Forecasting Bikesharing Usage for DC's Capital Bikshare System
@@ -169,15 +178,7 @@ We see that windspeed and precipitation exhibit rightward skew, which makes sens
 By contrast, temperature has leftward skew, with a smaller number of colder days
 
 ```{r weekday_usage, echo=F, out.width="60%", fig.align="center"}
-df_plot <- final_df |>
-  mutate(
-    season = factor(season),
-    day_of_week = factor(day_of_week)
-  )
-levels(df_plot$season) <- c('winter', 'spring', 'summer', 'fall')
-levels(df_plot$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat')
-
-df_plot %>% 
+final_df %>% 
   ggplot(mapping = aes(day_of_week, cnt, color = season)) +
   geom_boxplot() +
   labs(
@@ -193,7 +194,7 @@ highest in the summer, with spring and fall in between.
 Fortunately, there is not a huge amount of variation in usage between weekdays and weekends.
 
 ```{r weekday_usage2, echo=F, out.width="60%", fig.align="center"}
-df_plot %>% 
+final_df %>% 
   ggplot(mapping = aes(dteday, cnt, color = season)) +
   geom_point() +
   labs(
@@ -209,7 +210,7 @@ that models would need to take into account not just variation within a year,
 but overall increasing usage over time.
 
 ```{r temp_usage, echo=F, out.width="60%", fig.align="center"}
-df_plot %>%
+final_df %>%
   ggplot(mapping = aes(TMAX, cnt, color = season)) +
   geom_point() +
   labs(
@@ -224,7 +225,7 @@ Consistent with our literature review, see that as temperature increases, usage
 tends to increase, until around 30 degrees Celsius, after which usage tends to decrease.
 
 ```{r prcp_usage, echo=F, out.width="60%", fig.align="center"}
-df_plot %>%
+final_df %>%
   ggplot(mapping = aes(PRCP, cnt, color = season)) +
   geom_point() +
   labs(
@@ -238,7 +239,7 @@ The relationship between precepitation and usage appears somewhat weaker than te
 Still, the highest precipitation days tend not to have high usage, consitent with an overall negative effect of preciptiation on usage.
 
 ```{r awnd_usage, echo=F, out.width="60%", fig.align="center"}
-df_plot %>%
+final_df %>%
   ggplot(mapping = aes(AWND, cnt, color = season)) +
   geom_point() +
   labs(
@@ -251,6 +252,7 @@ df_plot %>%
 We can also see a slightly negative relationship between windspeed and usage.
 
 A correlation matrix comparing our numeric variables validates our graphical EDA:
+
 * There is a positive correlation between temperature and count
 * There are negative correlations between precipitation and count, and windspeed and count
 
@@ -269,22 +271,101 @@ final_df %>%
 
 # Overview of Modeling
 
-For our modeling, we used the `final_df.csv` file in the Other Resources directory, which is described in the accompanying readme.
+For our modeling, we used the `final_df.csv` file in the `Data` directory, which is described in the accompanying readme.
 
 ## Model Types and Comparison
+We ran multiple different models to try and best determine what fits the data best. Ideally since we are dealing with time series data, we are expecting that it will be the best at predicting. We decided to only showcase three of the models in this paper. The three are LASSO, ARIMA and LightGBM (gradient boosting).
 
 ### Linear Regression
-```{r linreg, echo=F, out.width="75%", fig.align="center"}
-final_df <- final_df %>% mutate(season = as_factor(season)) %>%  
-  mutate(day_of_week = as_factor(day_of_week))
-lin_reg <- lm(cnt ~ TMAX + PRCP + AWND + day_of_week + season, data = final_df)
-summary(lin_reg)
-pred <- predict(lin_reg, final_df)
-plot(final_df$cnt)
-lines(pred, col = 'red')
+This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to calculate a trend.
+
+```{r linreg, echo=F, out.width="75%", fig.align="center", results='hide'}
+model_df <- final_df |>
+  select(-dteday)
+fit <- lm(cnt ~ ., data = model_df)
+summary(fit)
+pred <- predict(fit, model_df)
+naive.rmse <- sqrt(mean((pred - model_df$cnt)^2))
+naive.rmse
+# 2632.675
+model_df |>
+  ggplot(mapping = aes(x=1:length(cnt), y = cnt)) +
+  geom_line() + 
+  geom_line(mapping = aes(y = pred), col = 'red', alpha = 0.5) +
+  labs(
+    x = 'Date',
+    y = 'Bike usage',
+    title = "Linear Regression"
+  )
 ```
-A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years,
-and under-predicts usage in later years, due to lacking a trend/time series component.
+
+A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component.
+
+### Linear Regression with Time Series
+Since we can see above that we are unable to predict without time series, what if we create a model that attempts to predict with trend and seasonality.
+```{r ts_dataframe, echo=F, results='hide', message=FALSE}
+ts_df <- read_csv('../Data/final_df.csv') |>
+  mutate(
+    Date = dteday,
+    season = factor(season),
+    day_of_week = factor(day_of_week),
+    Count = cnt
+  ) |>
+  mutate(week = as.Date(cut(Date, "week"))) |>
+  group_by(week) |>
+  summarize(count = mean(Count))
+
+Y <- ts(ts_df$count, start = c(2010, 12), frequency = 52)
+train_Y <- subset(Y, end = 314)
+test_Y <- subset(Y, start = 315)
+```
+
+The data was changed for the time series models to use weekly data instead of daily. The reason is for cleaner plots and reduced time in calculating some of the time series models. The total count was determined by taking the average over a week's time.
+
+```{r linreg_ts, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
+lm.fit <- tslm(train_Y ~ trend + season)
+lm.fcst <- forecast(lm.fit, h = 52)
+autoplot(train_Y) +
+  autolayer(lm.fcst, series = 'Forecast', alpha=0.5) +
+  autolayer(test_Y, series = 'Actual') +
+  labs(
+    title = "Time Series Linear Regression Model",
+    subtitle = "Bikeshare usage on weekly basis",
+    x = 'Time in Weeks',
+    y = 'Average Bike usage'
+  )
+lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
+lm.rmse
+# 1659.656
+```
+
+By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model we have a RMSE of **1659.65**.
+
+### ARIMA
+When plotting the data as well as seeing the above Linear Regression with Time Series, one of the best models for dealing with Time Series is the ARIMA and its derivatives. 
+
+```{r arima, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
+fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
+arima.fcst <- forecast(fit_arima, h=52)
+autoplot(train_Y) +
+  autolayer(arima.fcst, series = 'Forecast', alpha = 0.5) +
+  autolayer(test_Y, series = 'Actual') +
+  labs(
+    title = "Time Series ARIMA Model",
+    subtitle = "Bikeshare usage on weekly basis",
+    x = 'Time in Weeks',
+    y = 'Average Bike usage',
+    caption = arima.fcst$method
+  )
+arima.rmse <- sqrt(mean((arima.fcst$mean - test_Y)^2))
+arima.rmse
+# 1503.639
+```
+
+It was determined that the best ARIMA model for our data was `order = (3, 1, 1)` and `seasonal = (0, 1, 1)`. This model had an RMSE of **1503.639**. It was better able to forecast/predict the final year as compared to the linear regression model.
+
+### LightGBM
+
 
 ## Model Selection and Optimization
 
@@ -292,7 +373,7 @@ and under-predicts usage in later years, due to lacking a trend/time series comp
 
 ## Detailed evaluation and interpretation of results
 
-#Conclusion
+# Conclusion
 
 One finding was that forecasting effectively requires more data than two years of usage. Our initial models trained just on 2011-2012 data did not greatly outperform linear regression.
 

@@ -69,23 +69,7 @@ The dataset contains 2011 and 2012 historical usage data from Washington, DC’s
 Capital Bikeshare program, one of the first large scale 
 bikeshare programs in the nation. Usage data is broken out by day and by hour.
 Additional data included a variety of information on weather, season, and whether
-a day was a holiday:
-
-    - holiday : whether day is holiday or not (extracted from http://dchr.dc.gov/page/holiday-schedule)
-    - weekday : day of the week
-    - workingday : if day is neither weekend nor holiday is 1, otherwise is 0.
-    + weathersit :
-   	 - 1: Clear, Few clouds, Partly cloudy, Partly cloudy
-   	 - 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
-   	 - 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
-   	 - 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
-    - temp : Normalized temperature in Celsius. The values are divided to 41 (max)
-    - atemp: Normalized feeling temperature in Celsius. The values are divided to 50 (max)
-    - hum: Normalized humidity. The values are divided to 100 (max)
-    - windspeed: Normalized wind speed. The values are divided to 67 (max)
-    - casual: count of casual users
-    - registered: count of registered users
-    - cnt: count of total rental bikes including both casual and registered
+a day was a holiday.
 
 ## Data Cleaning Process
 
@@ -101,6 +85,7 @@ Other Resources directory to do this.
 Specifically, we ran get_bikeshare_data.py to get bikeshare data from Capital Bikeshare directly, 
 then we ran join_data.py (which imports from noaa.py) to join the data 
 with weather data from the NOAA API. 
+
 We used the same process to add the additional weather columns 
 to the 2011 and 2012 as well.
 
@@ -118,7 +103,9 @@ The Weather data included:
 * PRCP: precipitation (tenths of mm), and 
 * AWND: average daily windspeed (km/h). 
 
-Our R code from our EDA applies a season variable to the dataset, based on the date.
+The final merged dataset used for analysis is final_df.csv located in the Other Resources folder.
+
+Our R code applies a season variable to the dataset, based on the date.
 
 ## Exploratory Data Analysis
 
@@ -268,9 +255,9 @@ final_df %>% select(TMAX, PRCP, AWND, cnt) %>% cor()
 
 For our modeling, we used the `final_df.csv` file in the Other Resources directory, which is described in the accompanying readme.
 
-Model Types and Comparison
+## Model Types and Comparison
 
-
+### Linear Regression
 ```{r linreg, echo=F, out.width="75%", fig.align="center"}
 final_df <- final_df %>% mutate(season = as_factor(season)) %>%  
   mutate(day_of_week = as_factor(day_of_week))
@@ -283,9 +270,11 @@ lines(pred, col = 'red')
 A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years,
 and under-predicts usage in later years, due to lacking a trend/time series component.
 
-Model Selection and Optimization
-Model Performance
-Detailed evaluation and interpretation of results
+## Model Selection and Optimization
+
+## Model Performance
+
+## Detailed evaluation and interpretation of results
 
 #Conclusion
 

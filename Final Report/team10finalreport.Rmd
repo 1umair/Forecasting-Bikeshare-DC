@@ -33,11 +33,13 @@ library(broom)
 * Works Cited
 
 # Introduction
+
 Bikesharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. The riding of bikes helps to improve the lives of both users, as well as non-users, as each bike trip potentially represents a trip that would otherwise have required a car. We used data from the DC Capital Bikeshare from 2011 to 2017. 
 
-The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that predicts the usage based on certain predictor variables.
+The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that forecasts the usage based on certain predictor variables.
 
 # Overview of Project
+
 The idea of the project was to use different data acquisition, cleaning and modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast the bike usage, then it would allow the company to plan for the best route to increasing our fleet as well as expanding the available stations that are offered.
 
 Some of the questions were: can we use the data to know when our usage is lower to repair bikes? When should we start increasing our fleet to best meet demand? Does weather and seasons have an impact on our business model? 
@@ -82,8 +84,15 @@ The dataset had required minimal cleaning. We had to convert several variables i
 Initial EDA on the dataset we began with indicated we did not have sufficient
 data to fit any models that could improve upon linear regression. So, we scraped
 and combined two different datasets. We used python scripts located in the
-Other Resources directory to do this. Specifically, we ran get_bikeshare_data.py to get bikeshare data,
-then we ran join_data.py (which imports from noaa.py) to join the data with weather data from the NOAA API. We used the same process to add the additional weather columns to the 2011 and 2012 as well.
+Other Resources directory to do this. 
+
+Specifically, we ran get_bikeshare_data.py to get bikeshare data from Capital Bikeshare directly, 
+then we ran join_data.py (which imports from noaa.py) to join the data 
+with weather data from the NOAA API. 
+We used the same process to add the additional weather columns 
+to the 2011 and 2012 as well.
+
+### Sources for additional datasets:
 
 * Capital Bikeshare usage data from 01-01-2013 through 12-31-2017, from
 Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
@@ -147,6 +156,8 @@ We see that windspeed and precipitation exhibit rightward skew, which makes sens
 * Most days have no precipitation
 * Most days have moderate windspeed, while a few have very high windspeed
 
+By contrast, temperature has leftward skew, with a smaller number of colder days
+
 ```{r weekday_usage, echo=F, out.width="75%", fig.align="center"}
 final_df %>% mutate(season = as_factor(season)) %>%  
   mutate(day_of_week = as_factor(day_of_week)) %>%
@@ -187,6 +198,7 @@ but overall increasing usage over time.
 ## Key Predictors
 
 # Overview of Modeling
+
 Model Types and Comparison
 
 
@@ -199,14 +211,16 @@ pred <- predict(lin_reg, final_df)
 plot(final_df$cnt)
 lines(pred, col = 'red')
 ```
-A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45
+A naive linear regression does not incorporate any time series factors, has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years,
+and under-predicts usage in later years, due to lacking a trend/time series component.
 
 Model Selection and Optimization
 Model Performance
 Detailed evaluation and interpretation of results
 
 #Conclusion
-Overall conclusion and key learnings
+
+One finding was that forecasting effectively requires more data than two years of usage. Our initial models trained just on 2011-2012 data did not greatly outperform linear regression.
 
 # Works Cited
 

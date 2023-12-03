@@ -64,7 +64,7 @@ Some of the questions were:
 * When should we start increasing our fleet to best meet demand? 
 * Do weather or seasons have an impact on usage? 
 
-We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (moderate temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model? Also, could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
+We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (moderate temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and wind speed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model? Also, could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
 
 
 # Overview of Data
@@ -74,7 +74,7 @@ We made an initial hypothesis that we would see a higher usage during the summer
 We started by just looking at two years of Capital Bikeshare usage from this dataset: [https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)
 
 The dataset contains 2011 and 2012 historical usage data from Washington DC’s public Capital Bikeshare program. This is one of the first large scale 
-bikeshare programs in the nation. Usage data is broken out by day and by hour. Additional data included a variety of information on weather, season, and whether a day was a holiday.
+bike share programs in the nation. Usage data is broken out by day and by hour. Additional data included a variety of information on weather, season, and whether a day was a holiday.
 
 ## Data Cleaning Process
 
@@ -583,11 +583,11 @@ One finding was that forecasting effectively requires more data than two years o
 
 We also validated that linear regression was not an optimal approach to this data, which makes sense given our use of time series data. We could have used a linear regression model if we captured trend and seasonality as a feature for the model. ARIMA and LightGBM were much better suited to predicting future increase as well as matching seasonality patterns. ARIMA and LightGBM both have their pitfalls, but we discussed the possibility of feeding in the ARIMA's output into our LightGBM model as one of its features, but didn't have the time to test this. This would have allowed the LightGBM model to have trend and seasonality prediction as features. We do believe that the combination of these two models would be useful for this and other bike sharing programs, but were unable to verify the results.
 
-One key finding is that because daily usage fluctuates significantly, using mean of weekly usage smoothed our data and led to much better-performing models. In this case we felt this was beneficial, because as noted above, any bikeshare system would likely be adding new vehicles to the fleet or subtracting vehicles for maintenance on a weekly or monthly basis rather than on a daily basis. This also helped reduce outliers' affect on the data set, and random fluctuations in the data.
+One key finding is that because daily usage fluctuates significantly, using mean of weekly usage smoothed our data and led to much better-performing models. In this case we felt this was beneficial, because as noted above, any bike share system would likely be adding new vehicles to the fleet or subtracting vehicles for maintenance on a weekly or monthly basis rather than on a daily basis. This also helped reduce outliers' affect on the data set, and random fluctuations in the data.
 
 # Literature Review Summary
 
-We reviewed a few papers modeling bikeshare usage in different cities across the globe (see Works Cited). These papers generally shared the same findings, which largely align with our Capital Bikeshare data:
+We reviewed a few papers modeling bike share usage in different cities across the globe (see Works Cited). These papers generally shared the same findings, which largely align with our Capital Bikeshare data:
 
 * Usage increases as temperature increases, then starts to decrease as temperatures go into the 90s (Fahrenheit)
 * Precipitation of any amount discourages cycling

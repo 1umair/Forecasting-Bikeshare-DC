@@ -11,11 +11,6 @@ header-includes:
 - \fancyfoot[CE,CO]{}
 - \headsep 1.5em
 output: pdf_document
-# - "\\fancyhead[CO,CE]{\\textbf{\\Large Forecasting Bikesharing Usage \\\\ Team 10
-#   - Final Report} \\\\ https://github.gatech.edu/MGT-6203-Fall-2023-Canvas/Team-10}"
-# output:
-#   html_document:
-#     df_print: paged
 fontsize: 11pt
 ---
 
@@ -27,7 +22,6 @@ require(gridExtra)
 library(kableExtra)
 library(broom)
 library(forecast)
-# library(fpp2)
 library(data.table)
 library(lightgbm)
 set.seed(123)
@@ -117,7 +111,7 @@ Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
 
 We can see that fortunately, Bikeshare usage per day is not heavily skewed, but has closer to a normal distribution.
 
-```{r hist_plots, echo=F, fig.align="center", message=FALSE}
+```{r hist_plots, echo=F, out.width="60%", fig.align="center", message=FALSE}
 usage_hist <- final_df %>% 
   ggplot() +
   geom_histogram(mapping = aes(cnt), fill = 'red', alpha = 0.5) +
@@ -190,13 +184,14 @@ final_df %>%
     y = "Total Bike Usage",
     title = "Total Bike Usage",
     subtitle = "Total Bike Usage Across All Times in Combined Dataset"
-  )
+  ) +
+  coord_fixed(ratio = 0.08)
 ```
 
 The most challenging aspect of our dataset is that usage was not static. It grew from 2011 through 2017, which shows an upward trend. While this was obviously good for Capital Bikeshare, it meant that models would need to take into account not just variation within a year but an upward trend.
 
 ```{r temp_usage, echo=F, out.width="60%", fig.align="center"}
-final_df %>%
+temp_usage_plot <- final_df %>%
   ggplot(mapping = aes(TMAX, cnt, color = season)) +
   geom_point() +
   labs(
@@ -204,13 +199,14 @@ final_df %>%
     y = "Total Bike Usage",
     title = "Total Bike Usage by Season relative to Temperature",
     subtitle = "Total Bike Usage vs. Temperature"
-  )
+  ) #
+  # coord_fixed(ratio = 0.008)
 ```
 
-Consistent with our literature review, we see that as temperature increases usage tends to increase until around 30 degrees Celsius, after which usage tends to decrease.
+Consistent with our literature review, we see in the below image that as temperature increases usage tends to increase until around 30 degrees Celsius, after which usage tends to decrease.
 
-```{r prcp_usage, echo=F, out.width="60%", fig.align="center"}
-final_df %>%
+```{r prcp_usage, echo=F, out.width="75%", fig.align="center"}
+prcp_usage_plot <- final_df %>%
   ggplot(mapping = aes(PRCP, cnt, color = season)) +
   geom_point() +
   labs(
@@ -219,6 +215,7 @@ final_df %>%
     title = "Total Bike Usage by Season relative to Precipitation",
     subtitle = "Total Bike Usage vs. Precipitation",
   )
+grid.arrange(temp_usage_plot, prcp_usage_plot, nrow = 2)
 ```
 
 The relationship between precipitation and usage appears somewhat weaker than temperature. Still, the highest precipitation days tend not to have high usage, consistent with an overall negative effect of precipitation on usage. This is also somewhat hard to definitively define, unlike temperature, since rain isn't as consistent. You could almost see higher precipitation as an outlier in the data. 
@@ -252,7 +249,11 @@ We can also see the negative correlation of temperature with wind speed. Fortuna
 
 ## Key Predictors
 
-The key predictors for time series will be time, which is made up of a trend and seasonality component. 
+The key predictors for time series will be time, which is made up of a trend and seasonality component.
+
+We used LASSO to determine which predictors are key. LASSO is used for feature selection by reducing the estimated coefficient for a predictor. If coefficient is zero, then the predictor may not have information about the response. After running this model, we see that `TMAX`, `PRCP`, `season.winter`, `season.spring`, `day_of_week.Sun`, `day_of_week.Mon`, `day_of_week.Wed` and `day_of_week.Sat` are not reduced to zero. Taking these predictors, we ran another linear regression model looking for which predictors were significant based on their `p-value`. 
+
+Therefore, the key predictors that were used for classification models were `TMAX`, `PRCP`, `season.winter` and `day_of_week.Wed`.
 
 # Overview of Modeling
 
@@ -264,7 +265,7 @@ We ran multiple different models to try to best determine what fits the data bes
 
 ### Linear Regression
 
-This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to calculate a trend.
+This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to fit the trend.
 
 ```{r linreg, echo=F, out.width="60%", fig.align="center", results='hide'}
 model_df <- final_df |>
@@ -275,18 +276,24 @@ pred <- predict(fit, model_df)
 naive.rmse <- sqrt(mean((pred - model_df$cnt)^2))
 naive.rmse
 # 2632.675
+
 model_df |>
-  ggplot(mapping = aes(x=1:length(cnt), y = cnt)) +
-  geom_line() + 
-  geom_line(mapping = aes(y = pred), col = 'red', alpha = 0.5) +
+  ggplot(mapping = aes(x=final_df$dteday, y = cnt)) +
+  geom_line(aes(color = 'Actual')) + 
+  geom_line(mapping = aes(y = pred, color = 'Predicted'), alpha = 0.5) +
   labs(
-    x = 'Date',
-    y = 'Bike usage',
-    title = "Linear Regression"
-  )
+    x = 'Time in Days',
+    y = 'Bikeshare usage',
+    title = "Linear Regression",
+    subtitle = "Bikeshare usage on daily basis",
+    color = 'Forecast',
+    caption = paste("RMSE:", round(naive.rmse, 3))
+  ) +
+  scale_color_manual(values = c("Actual" = "black", "Predicted" = "red"))
+
 ```
 
-A naive linear regression does not incorporate any time series factors such as trend. It has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component.
+A naive linear regression does not incorporate any time series factors such as trend. It has a poor RMSE (root mean square error), which can be seen in the caption above. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component. We can also see that on some days we predict that there will be almost a `-5000` bike usage, which is impossible. It is very obvious that this does a horrible job of predicting bike usage.
 
 ### Linear Regression with Time Series
 
@@ -309,11 +316,14 @@ train_Y <- subset(Y, end = 314)
 test_Y <- subset(Y, start = 315)
 ```
 
-Therefore, for our next timeseries model, we used weekly average usage instead of daily actual usage. We implemented this change to get cleaner plots and reduced time in calculating some of the time series models. 
+Therefore, for our next timeseries model, we used weekly average usage instead of daily actual usage. We implemented this change to get cleaner plots and reduced time in calculating some of the time series models. Due to the weekly using an mean of the week's bike share usage, this has a tendency to reduce outliers from affecting the trend by smoothing the data.
 
 ```{r linreg_ts, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 lm.fit <- tslm(train_Y ~ trend + season)
 lm.fcst <- forecast(lm.fit, h = 52)
+lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
+# 1659.656
+
 autoplot(train_Y) +
   autolayer(lm.fcst, series = 'Forecast', alpha=0.5) +
   autolayer(test_Y, series = 'Actual') +
@@ -321,42 +331,43 @@ autoplot(train_Y) +
     title = "Time Series Linear Regression Model",
     subtitle = "Bikeshare usage on weekly basis",
     x = 'Time in Weeks',
-    y = 'Average Weekly Bikeshare usage'
-  )
-lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
-lm.rmse
-# 1659.656
+    y = 'Average Weekly Bikeshare usage',
+    caption = paste("RMSE:", round(lm.rmse, 3))
+  ) +
+  coord_fixed(ratio = 0.0003)
 ```
 
-By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model using a test set, we have a RMSE of **1659.65**. The test set is the entire year of 2017. It was withheld from the training data.
+By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model using a test set, we have a RMSE of **1659.66**. The test set is the entire year of 2017. It was withheld from the training data.
 
 ### ARIMA
 
-When plotting the data as well as seeing the above Linear Regression with Time Series, we know we need to be able to model change over time. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
+From EDA and the linear regression models, we know we need to be able to model change over time or time series. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
 
 ```{r arima, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
 arima.fcst <- forecast(fit_arima, h=52)
+arima.rmse <- sqrt(mean((arima.fcst$mean - test_Y)^2))
+# 1503.639
+
 autoplot(train_Y) +
   autolayer(arima.fcst, series = 'Forecast', alpha = 0.5) +
   autolayer(test_Y, series = 'Actual') +
   labs(
-    title = "Time Series ARIMA Model",
+    title = paste("Time Series ARIMA Model:", arima.fcst$method),
     subtitle = "Bikeshare usage on weekly basis",
     x = 'Time in Weeks',
     y = 'Average Bike usage',
-    caption = arima.fcst$method
+    caption = paste("RMSE:", round(arima.rmse, 3))
   )
-arima.rmse <- sqrt(mean((arima.fcst$mean - test_Y)^2))
-arima.rmse
-# 1503.639
 ```
 
-It was determined that the best ARIMA model for our data was `order = (3, 1, 1)` and `seasonal = (0, 1, 1)`. This model had an RMSE of **1503.639**. It was better able to forecast/predict the final year as compared to the linear regression model.
+It was determined that the best ARIMA model for our data was `order = (3, 1, 1)` and `seasonal = (0, 1, 1)`. The model has an RMSE of **1503.639** for the test data. It was better able to forecast/predict the final year as compared to the time series linear regression model.
 
 ### LightGBM
 
-```{r Lightgbm, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
+We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample i.e the test data set. Pre 2017, the predicted line describes the fitting on the training data set itself.
+
+```{r Lightgbm, echo=F, out.width="75%", fig.align='center', results='hide', message=FALSE}
 
 final_data <- read_csv('../Data/final_df.csv') |>
   select(
@@ -444,7 +455,7 @@ day_wise <- ggplot(df12, aes(x = Date)) +
   geom_line(aes(y = Actual, color = "Actual")) +
   geom_line(aes(y = Predited, color = "Predited")) +
   labs(
-    title = "Day Wise LightGBM Model",
+    title = "LightGBM Model by Day",
     subtitle = "Bikeshare usage Acutal vs Predicted",
     x = "Time in Days",
     y = "Average Bike Usage",
@@ -540,7 +551,7 @@ week_wise <- ggplot(df12_week, aes(x = Date)) +
   geom_line(aes(y = Actual, color = "Actual")) +
   geom_line(aes(y = Predited, color = "Predited")) +
   labs(
-    title = "Week Wise LightGBM Model",
+    title = "LightGBM Model by Week",
     subtitle = "Bikeshare usage Acutal vs Predicted",
     x = "Time in Weeks",
     y = "Average Bike Usage",
@@ -549,26 +560,29 @@ week_wise <- ggplot(df12_week, aes(x = Date)) +
   scale_color_manual(values = c("Actual" = "blue", "Predited" = "red")) +
   theme_minimal()
 
-day_wise
-week_wise
+grid.arrange(day_wise, week_wise, ncol = 1)
+# day_wise
+# week_wise
 
 ```
-
-We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample i.e the test data set. Pre 2017, the predicted line describes the fitting on the training data set itself.
 
 However, despite the overall success in capturing trends, there's a notable limitation in predicting the increase in usage observed in 2017. The RMSE (Root Mean Squared Error) of weekly forecast is lower than daily forecast as it is able to remove the noise in the data and capture it well. Nevertheless, the model still struggles to accurately predict the surge in usage during 2017.
 
 ## Model Performance
 
-Overall, ARIMA and LightGBM do the best on our dataset, with RMSE of 1503.639 and 1552.007 respectively. We would likely recommend usage of these types of models for future bikeshare program forecasting efforts involving Capital Bikeshare, or other bikesharing programs. It is possible these models may also be useful for forecasting other types of seasonally-varying behaiors as well.  
+Overall, ARIMA and LightGBM do the best on our dataset, with RMSE of `1503.639` and `1552.007` respectively. We can see that the RMSE is still fairly high for both of the models, but when predicting bike share usage we don't need perfect results. The main goal is to stay ahead of the customer usage, which we believe either of our models are capable of performing. 
+
+ARIMA has a much better ability at forecasting for trend and seasonality. The major issue is that it doesn't take into account any other variables. You can think of it as all the variables have been "baked" into the usage and, therefore, it is only trying to forecast the usage. If we went through an extremely hot or cold temperatures, ARIMA's model doesn't take that into account so will need time to start adjusting its output to reflect that change.
+
+LightGBM does a better job at utilizing features such as weather to better predict the usage of the bikes. The issue is that it is not able to accurately predict future usage because it doesn't take into account trend or seasonality.
 
 # Conclusion
 
-One finding was that forecasting effectively requires more data than two years of usage. Our initial time series models trained on 2011-2012 data and performed poorly. They were unable to learn the trend and seasonality with so little time.
+One finding was that forecasting effectively requires more data than two years of usage. Our initial time series models trained on 2011-2012 data and performed poorly. They were unable to learn the trend and seasonality with so few data points.
 
-We also validated that linear regression was not an optimal approach to this data, which makes sense given our use of time series data. ARIMA and LightGBM were much better suited to predicting future increase as well as matching seasonality patterns.
+We also validated that linear regression was not an optimal approach to this data, which makes sense given our use of time series data. We could have used a linear regression model if we captured trend and seasonality as a feature for the model. ARIMA and LightGBM were much better suited to predicting future increase as well as matching seasonality patterns. ARIMA and LightGBM both have their pitfalls, but we discussed the possibility of feeding in the ARIMA's output into our LightGBM model as one of its features, but didn't have the time to test this. This would have allowed the LightGBM model to have trend and seasonality prediction as features. We do believe that the combination of these two models would be useful for this and other bike sharing programs, but were unable to verify the results.
 
-One key finding is that because daily usage fluctuates significantly, using mean of weekly usage smoothed our data and led to much better-performing models. In this case we felt this was beneficial, because as noted above, any bikeshare system would likely be adding new vehicles to the fleet or subtracting vehicles for maintenance on a weekly or monthly basis rather than on a daily basis. This also helped smooth out outliers, and random fluctuations in the data.
+One key finding is that because daily usage fluctuates significantly, using mean of weekly usage smoothed our data and led to much better-performing models. In this case we felt this was beneficial, because as noted above, any bikeshare system would likely be adding new vehicles to the fleet or subtracting vehicles for maintenance on a weekly or monthly basis rather than on a daily basis. This also helped reduce outliers' affect on the data set, and random fluctuations in the data.
 
 # Literature Review Summary
 

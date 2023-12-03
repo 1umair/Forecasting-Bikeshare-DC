@@ -5,6 +5,9 @@ library(lubridate)
 library(tidymodels)
 library(rpart)
 library(glmnet)
+
+library(caret)
+library(data.table)
 set.seed(123)
 
 # Data ----------------------------------
@@ -66,11 +69,13 @@ tree.rmse
 # LASSO ---------------------
 
 X <- df |>
-  select(-cnt)
+  select(-cnt, -day)
+dummy <- dummyVars(" ~ .", data = X)
+X <- data.frame(predict(dummy, newdata = X))
 
 X <- as.matrix(X)
 y <- df$cnt
-cv_mod <- cv.glmnet(X, y, alpha = 1)
+cv_mod <- cv.glmnet(X, y, alpha = 1, family = 'gaussian')
 best_lambda <- cv_mod$lambda.min
 best_lambda
 plot(cv_mod)
@@ -87,13 +92,5 @@ rsq
 
 lasso.rmse <- sqrt(mean((y_pred - df$cnt)^2))
 lasso.rmse
-# 2763.379
-
-
-
-
-
-
-
-
+# 2674.672
 

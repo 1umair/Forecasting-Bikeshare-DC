@@ -59,11 +59,12 @@ The purpose of this analysis is to determine variables/factors that help estimat
 The idea of the project was to use different modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast bikeshare usage, then it would allow Capital Bikeshare (or any agency/company running a bikesharing program) to plan for the best times to increase their fleet as well as expanding the available stations that are offered. A station is a location where the bikes are stored and can be rented.
 
 Some of the questions were: 
+
 * Can we use the data to forecast when our usage is lower to potentially remove some bikes from service for maintenance? 
 * When should we start increasing our fleet to best meet demand? 
 * Do weather or seasons have an impact on usage? 
 
-We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (relatively high temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model? Also, could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
+We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (moderate temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model? Also, could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
 
 
 # Overview of Data
@@ -89,7 +90,7 @@ Specifically, we ran `get_bikeshare_data.py` to get bikeshare data from Capital 
 
 Upon scraping the additional data, we combined this with our initial data set to create a new dataset that spanned from 2011 to 2017. We also added a few new feature variables such as `season`, which was missing from the new scraped dataset.
 
-Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily basis, we created a second dataset that reflected weekly usage. To create the weekly data set, we calculated the mean of usage across each week. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner, more presentable dataset. It makes sense to use a weekly dataset, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
+Instead of forecasting on a daily basis, we created a second dataset that reflected weekly usage. To create the weekly data set, we calculated the mean of usage across each week that would be used for time series models. This weekly dataset will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner, more presentable dataset. It makes sense to use a weekly dataset, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
 
 Therefore, we had one dataset that we performed EDA and performed linear regression and LightGBM on. All time series models were run against the weekly dataset.
 
@@ -109,7 +110,7 @@ Capital Bikeshare (https://ride.capitalbikeshare.com/system-data)
 
 ## Exploratory Data Analysis
 
-We can see that fortunately, Bikeshare usage per day is not heavily skewed, but has closer to a normal distribution.
+We can see that fortunately, Bikeshare usage per day is not heavily skewed, but aligns more towards to a normal distribution.
 
 ```{r hist_plots, echo=F, out.width="60%", fig.align="center", message=FALSE}
 usage_hist <- final_df %>% 
@@ -251,7 +252,7 @@ We can also see the negative correlation of temperature with wind speed. Fortuna
 
 The key predictors for time series will be time, which is made up of a trend and seasonality component.
 
-We used LASSO to determine which predictors are key. LASSO is used for feature selection by reducing the estimated coefficient for a predictor. If coefficient is zero, then the predictor may not have information about the response. After running this model, we see that `TMAX`, `PRCP`, `season.winter`, `season.spring`, `day_of_week.Sun`, `day_of_week.Mon`, `day_of_week.Wed` and `day_of_week.Sat` are not reduced to zero. Taking these predictors, we ran another linear regression model looking for which predictors were significant based on their `p-value`. 
+We used LASSO to determine which predictors are key. LASSO is used for feature selection by reducing the estimated coefficient for a predictor. If a coefficient is zero, then that predictor may not have information about the response. After running this model, we see that `TMAX`, `PRCP`, `season.winter`, `season.spring`, `day_of_week.Sun`, `day_of_week.Mon`, `day_of_week.Wed` and `day_of_week.Sat` are not reduced to zero. Taking these predictors, we ran another linear regression model looking for which predictors were significant based on their `p-value`. 
 
 Therefore, the key predictors that were used for classification models were `TMAX`, `PRCP`, `season.winter` and `day_of_week.Wed`.
 
@@ -316,7 +317,7 @@ train_Y <- subset(Y, end = 314)
 test_Y <- subset(Y, start = 315)
 ```
 
-Therefore, for our next timeseries model, we used weekly average usage instead of daily actual usage. We implemented this change to get cleaner plots and reduced time in calculating some of the time series models. Due to the weekly using an mean of the week's bike share usage, this has a tendency to reduce outliers from affecting the trend by smoothing the data.
+Therefore, for our next time series model, we used weekly average usage instead of daily actual usage. We implemented this change to get cleaner plots and reduced time in calculating some of the time series models. Due to the weekly using an mean of the week's bike share usage, this has a tendency to reduce outliers from affecting the trend by smoothing the data.
 
 ```{r linreg_ts, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 lm.fit <- tslm(train_Y ~ trend + season)
@@ -341,7 +342,7 @@ By changing the linear regression model to take in the trend and seasonality, we
 
 ### ARIMA
 
-From EDA and the linear regression models, we know we need to be able to model change over time or time series. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
+From EDA and the linear regression models, we know we need to be able to model the change over time or time series. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
 
 ```{r arima, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
@@ -572,7 +573,7 @@ However, despite the overall success in capturing trends, there's a notable limi
 
 Overall, ARIMA and LightGBM do the best on our dataset, with RMSE of `1503.639` and `1552.007` respectively. We can see that the RMSE is still fairly high for both of the models, but when predicting bike share usage we don't need perfect results. The main goal is to stay ahead of the customer usage, which we believe either of our models are capable of performing. 
 
-ARIMA has a much better ability at forecasting for trend and seasonality. The major issue is that it doesn't take into account any other variables. You can think of it as all the variables have been "baked" into the usage and, therefore, it is only trying to forecast the usage. If we went through an extremely hot or cold temperatures, ARIMA's model doesn't take that into account so will need time to start adjusting its output to reflect that change.
+ARIMA has a much better ability at forecasting for trend and seasonality. The major issue is that it doesn't take into account any other variables. You can think of it as all the variables have been "baked" into the usage and, therefore, it is only trying to forecast the usage. If we went through extremely hot or cold temperatures, ARIMA's model doesn't take that into account so will need time to start adjusting its output to reflect that change.
 
 LightGBM does a better job at utilizing features such as weather to better predict the usage of the bikes. The issue is that it is not able to accurately predict future usage because it doesn't take into account trend or seasonality.
 

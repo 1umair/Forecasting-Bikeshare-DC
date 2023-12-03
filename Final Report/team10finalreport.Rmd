@@ -26,7 +26,8 @@ library(ggplot2)
 require(gridExtra)
 library(kableExtra)
 library(broom)
-library(fpp2)
+library(forecast)
+# library(fpp2)
 library(data.table)
 library(lightgbm)
 set.seed(123)
@@ -86,7 +87,7 @@ The dataset had required minimal cleaning. We had to convert several variables i
 
 ### Additional Scraping, Cleaning
 
-Initial exploratory data analysis (EDA) performed on the dataset indicated we did not have sufficient data to fit any models. We found that we could scrape the Capital Bikeshare website in order to acquire more usage data. The only issue with this is that it didn't include weather data. Therefore, we decided to also scrape weather data. 
+Initial exploratory data analysis (EDA) indicated we did not have sufficient data to fit any models more complex than linear regression. We found that we could download additional Capital Bikeshare usage data. Because Capital Bikeshare's usage data did not include weather data, we decided to also scrape weather data. 
 
 We used python scripts located in the `Other Resources` directory to do this. 
 
@@ -94,7 +95,7 @@ Specifically, we ran `get_bikeshare_data.py` to get bikeshare data from Capital 
 
 Upon scraping the additional data, we combined this with our initial data set to create a new dataset that spanned from 2011 to 2017. We also added a few new feature variables such as `season`, which was missing from the new scraped dataset.
 
-Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily, which is how the new dataset was created, we created one that was weekly. By creating a weekly data set, we are taking the mean of the usage. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner more presentable dataset. This also makes sense to have it on a weekly, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
+Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily basis, which is how the new dataset was created, we created a second dataset that reflected weekly usage. By creating a weekly data set, we are taking the mean of the usage across each week. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner more presentable dataset. This also makes sense to have it on a weekly, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
 
 Therefore, we had one dataset that we performed EDA and performed linear regression and LightGBM on. All time series models were run against the weekly dataset.
 
@@ -250,16 +251,19 @@ final_df %>%
 We can also see the negative correlation of temperature with wind speed. Fortunately, precipitation has minimal correlation with temperature (-0.006) and relatively low correlation with wind speed (0.093). You would expect wind speed and precipitation to be somewhat correlated since there is often a breeze when it is raining.
 
 ## Key Predictors
+
 The key predictors for time series will be time, which is made up of a trend and seasonality component. 
 
 # Overview of Modeling
 
-For our modeling, we used the `final_df.csv` file in the `Data` directory, which is described in the accompanying readme on GitHub page. We also used an edited data set that converted the above dataset into weekly instead of daily for the time series models. We wanted to run models that were able to forecast in the future as well as the capability of classifying on a daily basis. We decided to use time series models to forecast into the future. We used different trees, gradient boosting and regression models to be able to classify the bike usage given some inputs.
+For our modeling, we used the `final_df.csv` file in the `Data` directory, which is described in the accompanying readme on GitHub page. We also used an edited data set that converted the above dataset into weekly instead of daily for the time series models. We wanted to run models that were able to forecast usage in the future as well as evaluate the capability of classifying on a daily basis. We decided to use time series models to forecast usage in the future. We used different trees, gradient boosting and regression models to be able to classify the bike usage given some inputs.
 
 ## Model Types and Comparison
+
 We ran multiple different models to try to best determine what fits the data best. Ideally since we are dealing with time series data, we are expecting that it will be the best at predicting. We decided to only showcase three of the models in this paper. The three are Linear Regression (with and without time series), ARIMA and LightGBM (gradient boosting). Other models were run and can be found in our `Code/Models` directory.
 
 ### Linear Regression
+
 This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to calculate a trend.
 
 ```{r linreg, echo=F, out.width="60%", fig.align="center", results='hide'}
@@ -285,6 +289,7 @@ model_df |>
 A naive linear regression does not incorporate any time series factors such as trend. It has an adjusted R-squared of 0.45. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component.
 
 ### Linear Regression with Time Series
+
 Since we can see above that we are unable to predict without time series, we decided to create a model that attempts to predict with trend and seasonality.
 
 ```{r ts_dataframe, echo=F, results='hide', message=FALSE}
@@ -304,7 +309,7 @@ train_Y <- subset(Y, end = 314)
 test_Y <- subset(Y, start = 315)
 ```
 
-Therefore, the data was changed for the time series models to use weekly data instead of daily. The reason is for cleaner plots and reduced time in calculating some of the time series models. The total bike usage was determined by taking the average over a week's time.
+Therefore, for our next timeseries model, we used weekly average usage instead of daily actual usage. We implemented this change to get cleaner plots and reduced time in calculating some of the time series models. 
 
 ```{r linreg_ts, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 lm.fit <- tslm(train_Y ~ trend + season)
@@ -316,17 +321,18 @@ autoplot(train_Y) +
     title = "Time Series Linear Regression Model",
     subtitle = "Bikeshare usage on weekly basis",
     x = 'Time in Weeks',
-    y = 'Average Bike usage'
+    y = 'Average Weekly Bikeshare usage'
   )
 lm.rmse <- sqrt(mean((lm.fcst$mean - test_Y)^2))
 lm.rmse
 # 1659.656
 ```
 
-By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model using a test set, we have a RMSE of **1659.65**. The test set is the entire year of 2017. It was with held from the training data.
+By changing the linear regression model to take in the trend and seasonality, we can see that we are doing fairly well at accurately forecasting the year of 2017. For this model using a test set, we have a RMSE of **1659.65**. The test set is the entire year of 2017. It was withheld from the training data.
 
 ### ARIMA
-When plotting the data as well as seeing the above Linear Regression with Time Series, we know we have a time series problem. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
+
+When plotting the data as well as seeing the above Linear Regression with Time Series, we know we need to be able to model change over time. One of the best models for dealing with Time Series is ARIMA and its derivatives. 
 
 ```{r arima, echo=F, out.width="60%", fig.align='center', results='hide', message=FALSE}
 fit_arima <- arima(train_Y, order = c(3, 1, 1), seasonal = c(0, 1, 1))
@@ -549,17 +555,20 @@ week_wise
 ```
 
 We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample i.e the test data set. Pre 2017, the predicted line describes the fitting on the training data set itself.
-However, despite the overall success in capturing trends, there's a notable limitation in predicting the increase in usage observed in 2017. The RMSE (Root Mean Squared Error) of weekly forecast is lower than daily forecast as it is able to remove the noise in the data and capture it well. Nevertheless, the model still struggles to accurately predict the surge in usage during 2017.
 
-## Model Selection and Optimization
+However, despite the overall success in capturing trends, there's a notable limitation in predicting the increase in usage observed in 2017. The RMSE (Root Mean Squared Error) of weekly forecast is lower than daily forecast as it is able to remove the noise in the data and capture it well. Nevertheless, the model still struggles to accurately predict the surge in usage during 2017.
 
 ## Model Performance
 
-## Detailed evaluation and interpretation of results
+Overall, ARIMA and LightGBM do the best on our dataset, with RMSE of 1503.639 and 1552.007 respectively. We would likely recommend usage of these types of models for future bikeshare program forecasting efforts involving Capital Bikeshare, or other bikesharing programs. It is possible these models may also be useful for forecasting other types of seasonally-varying behaiors as well.  
 
 # Conclusion
 
 One finding was that forecasting effectively requires more data than two years of usage. Our initial time series models trained on 2011-2012 data and performed poorly. They were unable to learn the trend and seasonality with so little time.
+
+We also validated that linear regression was not an optimal approach to this data, which makes sense given our use of time series data. ARIMA and LightGBM were much better suited to predicting future increase as well as matching seasonality patterns.
+
+One key finding is that because daily usage fluctuates significantly, using mean of weekly usage smoothed our data and led to much better-performing models. In this case we felt this was beneficial, because as noted above, any bikeshare system would likely be adding new vehicles to the fleet or subtracting vehicles for maintenance on a weekly or monthly basis rather than on a daily basis. This also helped smooth out outliers, and random fluctuations in the data.
 
 # Literature Review Summary
 

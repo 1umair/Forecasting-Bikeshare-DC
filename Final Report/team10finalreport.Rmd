@@ -57,15 +57,18 @@ levels(final_df$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sa
 
 Bike sharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. Due to the bike being used in place of the car in some situations, the riding of bikes helps to improve the lives of both users. It also help non-users since it reduces the number of cars on the road and $CO_2$ emissions. We used data from the DC Capital Bikeshare from 2011 to 2017. 
 
-The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that forecasts the usage based on certain predictor variables.
+The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that forecasts the usage based on weather, day of week, and season.
 
 # Overview of Project
 
-The idea of the project was to use different data acquisition, cleaning and modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast the usage, then it would allow the company to plan for the best route to increase their fleet as well as expanding the available stations that are offered. A station is a location where the bikes are stored and can be rented.
+The idea of the project was to use different modeling techniques to determine if we could forecast the bike usage. If we are able to model and forecast bikeshare usage, then it would allow Capital Bikeshare (or any agency/company running a bikesharing program) to plan for the best times to increase their fleet as well as expanding the available stations that are offered. A station is a location where the bikes are stored and can be rented.
 
-Some of the questions were: can we use the data to know when our usage is lower to repair bikes? When should we start increasing our fleet to best meet demand? Does weather and seasons have an impact on the business model? 
+Some of the questions were: 
+* Can we use the data to forecast when our usage is lower to potentially remove some bikes from service for maintenance? 
+* When should we start increasing our fleet to best meet demand? 
+* Do weather or seasons have an impact on usage? 
 
-We made an initial hypothesis that we would see a higher usage during the summer months and when the weather was nice (sunny no rain). With our initial exploratory data analysis, we could see that the usage data contains a trend and seasonality. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Does the season or weather have an impact?
+We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (relatively high temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
 
 
 # Overview of Data

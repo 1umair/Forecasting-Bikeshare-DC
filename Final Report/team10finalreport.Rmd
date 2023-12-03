@@ -50,7 +50,7 @@ levels(final_df$day_of_week) <- c('Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sa
 
 # Introduction
 
-Bike sharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. Due to the bike being used in place of the car in some situations, the riding of bikes helps to improve the lives of both users. It also help non-users since it reduces the number of cars on the road and $CO_2$ emissions. We used data from the DC Capital Bikeshare from 2011 to 2017. 
+Bike sharing systems are an increasingly popular solution in major urban areas to increase the usage of bicycles as a mode of transport. Bike usage improves the lives of users by providing exercise, but also helps non-users since more trips taken by bike leads to a reduction in the number of cars on the road and $CO_2$ emissions. We studied usage data from Washington DC's Capital Bikeshare from 2011 to 2017 and corresponding weather data. 
 
 The purpose of this analysis is to determine variables/factors that help estimate bike usage and develop a model that forecasts the usage based on weather, day of week, and season.
 
@@ -63,7 +63,7 @@ Some of the questions were:
 * When should we start increasing our fleet to best meet demand? 
 * Do weather or seasons have an impact on usage? 
 
-We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (relatively high temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model. Also could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
+We made an initial hypothesis that we would see a higher usage during the summer, and when the weather was nice (relatively high temperature, no precipitation, low windspeed). Initial exploratory data analysis (EDA) indicated that these hypotheses appeared true. Usage tends to be highest in spring and summer, and usage generally increases as temperature increases, and decreases as precipitation and windspeed increase. However, in addition to pronounced seasonality, we identified that there was a trend towards increased usage of the system over time. The question then became, can we model this through a time series model? Also, could we see what features were key factors in determining bike usage. Which factors overall appear to have the greatest impact?
 
 
 # Overview of Data
@@ -89,7 +89,7 @@ Specifically, we ran `get_bikeshare_data.py` to get bikeshare data from Capital 
 
 Upon scraping the additional data, we combined this with our initial data set to create a new dataset that spanned from 2011 to 2017. We also added a few new feature variables such as `season`, which was missing from the new scraped dataset.
 
-Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily basis, which is how the new dataset was created, we created a second dataset that reflected weekly usage. By creating a weekly data set, we are taking the mean of the usage across each week. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner more presentable dataset. This also makes sense to have it on a weekly, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
+Off of this dataset, we also created another dataset that was used for time series models. Instead of forecasting on a daily basis, we created a second dataset that reflected weekly usage. To create the weekly data set, we calculated the mean of usage across each week. This will help smooth over any outliers, but they wouldn't be removed. It allowed for a cleaner, more presentable dataset. It makes sense to use a weekly dataset, since you don't want your employees to have to constantly change bike quantities on a daily basis, but at least a weekly timeframe.
 
 Therefore, we had one dataset that we performed EDA and performed linear regression and LightGBM on. All time series models were run against the weekly dataset.
 
@@ -265,7 +265,7 @@ We ran multiple different models to try to best determine what fits the data bes
 
 ### Linear Regression
 
-This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The issue was they were unable to fit the trend.
+This is the very first model that we used as a base case. We also ran other basic linear regression models (LASSO, Ridge Regression, etc.) but they all seemed to perform similarly. The main problem was they were unable to fit the trend.
 
 ```{r linreg, echo=F, out.width="60%", fig.align="center", results='hide'}
 model_df <- final_df |>
@@ -293,7 +293,7 @@ model_df |>
 
 ```
 
-A naive linear regression does not incorporate any time series factors such as trend. It has a poor RMSE (root mean square error), which can be seen in the caption above. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component. We can also see that on some days we predict that there will be almost a `-5000` bike usage, which is impossible. It is very obvious that this does a horrible job of predicting bike usage.
+A naive linear regression does not incorporate any time series factors such as trend. It has a poor RMSE (root mean square error), which can be seen in the caption above. We can see that the linear regression over-predicts usage in early years, and under-predicts usage in later years, due to lacking a trend/time series component. We can also see that on some days we predict that there will be almost a `-5000` bike usage, which is impossible. It is obvious that this does a poor job of predicting bike usage.
 
 ### Linear Regression with Time Series
 
@@ -365,7 +365,7 @@ It was determined that the best ARIMA model for our data was `order = (3, 1, 1)`
 
 ### LightGBM
 
-We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample i.e the test data set. Pre 2017, the predicted line describes the fitting on the training data set itself.
+We implemented a powerful and efficient gradient boosting framework to predict/forecast the usage for the later years. The Predicted year of 2017 is out of sample for training, and constitutes the test data set. Pre-2017, the predicted line describes the fitting on the training data set itself.
 
 ```{r Lightgbm, echo=F, out.width="75%", fig.align='center', results='hide', message=FALSE}
 
